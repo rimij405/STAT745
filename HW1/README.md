@@ -1,5 +1,5 @@
 ---
-title: "HW 1: "
+title: "HW 1: Galaxy EDA"
 author: "Ian Effendi"
 course: "ISTE 780: Data Driven Knowledge Discovery"
 instructor: "Professor Qi Yu"
