@@ -1,0 +1,64 @@
+---
+title: "Homework 1"
+author: "Ian Effendi"
+output: rmarkdown::pdf_document
+vignette: >
+  %\VignetteIndexEntry{rmarkdown}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+## Certication
+
+> I certify that I indeed finished reading Ch. 2 from *An Introduction to Statistical Learning*, by James Gareth, Daniela Witten, Trevor Hastie, Robert Tibshirani
+> --- Ian Effendi (`iae2784@rit.edu`)
+
+The assignment tasks are completed below and provided in a brief report that highlights used R code and results.
+
+```{r setup}
+# library(RIT.STAT745.HW1)
+devtools::load_all("./")
+```
+
+## 1. Read in the data from the object, which was saved with `save(galaxies, file="galaxies.RData")` `R` command.
+
+```{r}
+load(file = "data/galaxies.RData")
+?galaxies
+```
+
+## 2. Perform an EDA on the data.
+
+### Describe shape of data
+
+TODO: Count number of rows.
+TODO: Count number of factors.
+
+### Describe categories
+
+TODO: Describe each category and typical summary statistics for each.
+
+### Summary statistics
+
+TODO: Additional summary statistics can be provided here.
+
+## 3. Fit a linear, no-intercept model (called Hubble's law).
+
+$velocity = \beta_1 * distance + \epsilon$
+
+## 4. Assess the quality of the model fit, but do not explore other models.
+
+## 5. Estimate $\beta_1$ (called Hubble's constant), including units. Hubble's constant is given in $km * sec^{-1} * Mpc^{-1}$. A `mega-parsec` ($Mpc$) is $3.086 * 10^{19} km$. Velocity data is given in $\frac{km}{s}$ and distance in $Mpc$.
+
+TODO: Calculate $\beta_{1}$.
+
+## 6. Find $\beta_{1}^{-1}$ (which approximates the age of the universe) in seconds, and then transform it into `years`.
+
+TODO: Calculate $\beta_{1}^{-1}$.

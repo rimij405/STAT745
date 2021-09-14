@@ -1,0 +1,14 @@
+citHeader("To cite RIT.STAT745.HW1 in publications use:")
+
+citEntry(
+    entry       = "Manual",
+    title       = "Homework 1 Solution ({RIT.STAT745.HW1})",
+    author      = personList(as.person("Peter Bajorski"), as.person("Ian Effendi")),
+    year        = "2021",
+    url         = "https://github.com/rimij405/STAT745/tree/main/HW1",
+
+    textVersion = 
+    paste("Peter Bajorski, Ian Effendi (2021).",
+          "Homework 1 Solution.",
+          "URL https://github.com/rimij405/STAT745/tree/main/HW1.")
+)
