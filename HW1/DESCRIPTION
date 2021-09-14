@@ -1,0 +1,18 @@
+Package: RIT.STAT745.HW1
+Title: Homework 1
+Version: 0.0.0.9000
+Authors@R: 
+    person(given = "Ian",
+           family = "Effendi",
+           role = c("aut", "cre"),
+           email = "iae2784@rit.edu")
+Description: This package contains analysis performed for Homework 1.
+License: MPL 2.0 + file LICENSE
+Encoding: UTF-8
+LazyData: true
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.1.2
+Suggests: 
+    knitr,
+    rmarkdown
+VignetteBuilder: knitr
