@@ -17,48 +17,219 @@ knitr::opts_chunk$set(
 
 ## Certication
 
-> I certify that I indeed finished reading Ch. 2 from *An Introduction to Statistical Learning*, by James Gareth, Daniela Witten, Trevor Hastie, Robert Tibshirani
-> --- Ian Effendi (`iae2784@rit.edu`)
+> I certify that I indeed finished reading Ch. 2 from *An Introduction to Statistical Learning*, by James Gareth, Daniela Witten, Trevor Hastie, Robert Tibshirani --- Ian Effendi (`iae2784@rit.edu`)
 
 The assignment tasks are completed below and provided in a brief report that highlights used R code and results.
 
-```{r setup}
-# library(RIT.STAT745.HW1)
+```{r setup, message=FALSE}
+# Loading dependencies.
 devtools::load_all("./")
+library(dplyr)
+library(ggplot2)
 ```
 
 ## 1. Read in the data from the object, which was saved with `save(galaxies, file="galaxies.RData")` `R` command.
 
-```{r}
+```{r, loader}
+# Load the galaxies.RData file into memory.
 load(file = "data/galaxies.RData")
-?galaxies
+
+# Confirm the class type of the loaded data.
+class(galaxies)
 ```
 
 ## 2. Perform an EDA on the data.
 
 ### Describe shape of data
 
-TODO: Count number of rows.
-TODO: Count number of factors.
+```{r, eda}
+# Show first 6 rows.
+head(galaxies)
+```
 
-### Describe categories
+`galaxies.RData` contains a 24 x 3 `data.frame` with a selection of unique galaxies from the *New General Catalogue of Nebulae and Clusters of Stars* (NGC) and the supplemental *Index Catalogues* (IC). Data has been provided by course instructor for STAT 745.
 
-TODO: Describe each category and typical summary statistics for each.
+### Describe features
+
+An example record contains the following information:
+
+```{r}
+galaxies[1,]
+```
+
+`Galaxy` (`fctr`) represents the unique identifier name given to galaxies from the NGC/IC catalogues. We will not be using the identifier itself in our regression problem, but they identify each of the 24 observed galaxies in the dataset.
+
+`velocity` is an integer (`int`) representing the recessional velocity, expressed in km per second ($\frac{km}{s}$).
+
+`distance` is a double (`dbl`) representing the proper distance of the galaxy from the observer, measured in mega-parsecs ($Mpc$ ).
+
+Note: $1\,Mpc \approx 3.086 * 10^{19}\,km$.
 
 ### Summary statistics
 
-TODO: Additional summary statistics can be provided here.
+#### `velocity`
+
+```{r}
+# Remove missing values prior to computation.
+remove_na <- TRUE
+
+# Generate summary statistics about the sample velocity.
+summarise(galaxies, 
+          count = n(),
+          std.dev = sd(velocity, na.rm = remove_na),
+          avg.velocity = mean(velocity, na.rm = remove_na), 
+          med.velocity = median(velocity, na.rm = remove_na), 
+          min.velocity = min(velocity, na.rm = remove_na),
+          max.velocity = max(velocity, na.rm = remove_na))
+```
+The average recessional velocity is $\approx 924 \frac{km}{s}$, with a median velocity of $827 \frac{km}{s}$.
+
+```{r}
+# Generate histogram.
+ggplot(data = galaxies) +
+  geom_histogram(mapping = aes(x = velocity), binwidth = 350)
+```
+
+The above shows the distribution of `velocity`.
+
+#### `distance`
+
+```{r}
+# Remove missing values prior to computation.
+remove_na <- TRUE
+
+# Generate summary statistics about the sample velocity.
+summarise(galaxies, 
+          count = n(), 
+          std.dev = sd(distance, na.rm = remove_na),
+          avg.distance = mean(distance, na.rm = remove_na), 
+          med.distance = median(distance, na.rm = remove_na),
+          min.distance = min(distance, na.rm = remove_na), 
+          max.distance = max(distance, na.rm = remove_na))
+```
+
+The average distance is $\approx 12.05\,Mpc$, with a median distance of $13.08\,Mpc$.
+
+```{r}
+# Generate histogram.
+ggplot(data = galaxies) +
+  geom_histogram(mapping = aes(x = distance), binwidth = 4)
+```
+
+The above shows the distribution of `distance`.
+
+```{r, galaxies-scatterplot, warning=FALSE}
+# Generates scatterplot of the response and predictor.
+ggplot(data = galaxies) +
+  geom_point(mapping = aes(x = distance, y = velocity)) +
+  geom_smooth(mapping = aes(x = distance, y = velocity))
+```
+
+From a scatterplot of the data, we can visually identify a positive correlation between velocity and distance.
 
 ## 3. Fit a linear, no-intercept model (called Hubble's law).
 
+The assignment considers `distance` to be the predictor and `velocity` to be the response, in the context of linear regression. Additionally, there is no intercept for this model, as shown below:
+
 $velocity = \beta_1 * distance + \epsilon$
+
+We can fit our model as such:
+
+```{r}
+# Fit a no-intercept linear regression model.
+model <- lm(velocity ~ 0 + distance, data = galaxies)
+
+# Summarize information on the model's performance and coefficients.
+summary(model)
+```
+As we can see, there is no intercept in the model, so there is no $\beta_0$ coefficient.
+
+The coefficient of regression for the `distance` factor is $\beta_1 = 76.681$.
 
 ## 4. Assess the quality of the model fit, but do not explore other models.
 
+### Residuals ($e_i$)
+
+$$
+e_i = y_i - \hat{y}_i
+$$
+
+A residual is the difference between our predicted value and the actual value for the $i$th observation. Intuitively, it can be considered as the vertical distance between a point and the line of the linear model.
+
+```{r}
+# Add residuals to the model.
+resids = resid(model)
+galaxies.model = cbind(galaxies, resids)
+
+# Plot residuals against velocity.
+ggplot(data = galaxies.model) + 
+  geom_histogram(mapping = aes(x = resids), binwidth = 300)
+```
+
+The residuals appear to be normally distributed.
+
+### Measure of Determination: $R^2$
+
+$$
+R^2 = \frac{\sum_{i=1}^{n}{(y - \bar{y})^2} - \sum_{i=1}^{n}{e_i^2}}{\sum_{i=1}^{n}{(y - \bar{y})^2}}
+$$
+
+$R^2$ is the coefficient of determination and it is a measure that describes the proportion of total variability explained by the regression model. $R^2$ can take on a value between $[0, 1]$, with values closer to $1$ representing a better fit for the data.
+
+In this case, $R^2 \approx 0.94$, which indicates a very strong fit for the data. If we had more observations to setup a test/validation structure, we could weigh concerns of over-fitting as well.
+
+### Residual Standard Error ($RSE$)
+
+$$
+RSE = \frac{\sum_{i=1}^{n}{(e_i^2)}}{n - (1 + k)}
+$$
+
+The residual standard error is the standard deviation of the residuals. Typically, a smaller residual standard error means our predictions are better.
+
+For regression of `velocity` on `distance` gives an $RSE = 258.9$. The advantage of $RSE$ is it is in the units of our response: our predictions deviate by $\approx 259\frac{km}{s}$ from the actual values. 
+
+By collecting more data and refitting the model, we may be able to improve its performance for the purposes of predicting velocity in the future.
+
 ## 5. Estimate $\beta_1$ (called Hubble's constant), including units. Hubble's constant is given in $km * sec^{-1} * Mpc^{-1}$. A `mega-parsec` ($Mpc$) is $3.086 * 10^{19} km$. Velocity data is given in $\frac{km}{s}$ and distance in $Mpc$.
 
-TODO: Calculate $\beta_{1}$.
+[Hubble's law](https://en.wikipedia.org/wiki/Hubble%27s_law#Interpretation) is formally defined as such:
+
+$$
+v = H_0D
+$$
+
+$v$, represents the recessional velocity and $D$ represents the proper distance. $H_0$, which represents Hubble's constant of proportionality, corresponds to the $\beta_1$ coefficient of regression in our no-intercept linear model, which is shown below:
+
+```{r}
+model$coefficients
+```
+
+Therefore, $H_0 \approx 76.85 \frac{(km/s)}{Mpc}$.
+
+This is equivalent to $\approx 2.50 * 10^{-18} km/s$.
 
 ## 6. Find $\beta_{1}^{-1}$ (which approximates the age of the universe) in seconds, and then transform it into `years`.
 
-TODO: Calculate $\beta_{1}^{-1}$.
+Hubble time, representing the approximate age of the universe can be calculated as the reciprocal of Hubble's constant.
+
+$$
+t_H = d/v = 1/H_0
+$$
+
+Given our linear model provides us directly with $\beta_1 = H_0$, we can calculate $t_H$ as the reciprocal of our coefficient of regression for `distance`.
+
+$$
+t_H = \beta_1^{-1}
+$$
+
+```{r, echo=FALSE, results='asis'}
+beta_1 <- summary(model)$coefficients[1]
+cat(paste0('$\\beta_1 = ', beta_1, ' ', '\\frac{(km/s)}{Mpc}$'), sep='')
+```
+
+```{r, echo=FALSE, results='asis'}
+t_H <- 1/beta_1
+cat(paste0('$t_H = \\beta_1^{-1} = ', t_H, ' ', '\\frac{Mpc}{(km/s)}$'), sep='')
+```
+
+This suggests that Hubble time is $t_H \approx 1.277 x 10^{10} years$.
