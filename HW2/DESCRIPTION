@@ -1,0 +1,17 @@
+Package: RIT.STAT745.HW2
+Title: Homework 2
+Version: 0.1.0
+Authors@R: 
+    person(given = "Ian",
+           family = "Effendi",
+           role = c("aut", "cre"),
+           email = "effendiian@gmail.com")
+Description: Completes the 2nd course assignment from RIT STAT 745, predictive analytics.
+License: Mozilla Public License 2.0 + LICENSE
+Encoding: UTF-8
+LazyData: true
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.1.2
+Depends:
+  tidyverse,
+  knitr
