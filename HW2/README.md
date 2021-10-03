@@ -5,6 +5,21 @@ course: "ISTE 780: Data Driven Knowledge Discovery"
 instructor: "Professor Qi Yu"
 ---
 
+## Package Details
+
+This package contains 2 datasets:
+
+* `liver_data`: Liver malfunction data on 345 men from an undisclosed experiement. (Source: From course instructor).
+
+* `severity_map`: Encoding map of severity groups to the appropriate `severity` labels for classification. (Source: `data-raw/severity_map.R`)
+
+## Installation
+
+```R
+# Install the development version of the package using devtools
+devtools::load_all("RIT.STAT745.HW2")
+```
+
 ## Assignment
 
 ### Part 1
