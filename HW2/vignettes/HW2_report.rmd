@@ -263,47 +263,230 @@ The fitted model summary suggests `drinks` is not a significant predictor of sev
 ```
 
 
-```{r make-crosstable}
+```{r make-crosstable, message=FALSE}
 # See "R/utils-confmat.R" for helper function definitions.
 # Find predictions and make misclassification table.
 p.threshold = 0.5
 liver.prediction <- (liver.fit$fitted >= p.threshold)
-liver.fit.metrics <- as.Classif.table(
-  y_pred = liver.prediction,
-  y_truth = map.where((liver$severity == "1")),
-  p.threshold = p.threshold
-)
+liver.truth <- map.where(liver$severity == "1")
+Classif.table <- table(liver.prediction, liver.truth)
+kable(Classif.table)
 ```
 
-```{r calc-error, echo=FALSE, results='hold'}
-liver.fit.ERR <- round(calc.ERR(liver.fit.metrics$table), digits = 4)
-kable(liver.fit.metrics$table)
-kable(liver.fit.ERR, col.names = c("Misclassification Error Rate (p = 0.5)"))
+```{r error-rate-funcs, include=FALSE, cache=FALSE}
 ```
 
-```{r classifier-utils, include=FALSE}
-```
 
-```{r calc-errors, results='hold'}
-liver.fit.ERR.rates <- calc.ERR.rates(
-  y_label = liver$severity,
-  y_pred = liver.fit$fitted,
-  pos = 1,
-  neg = 0
-)
-# Calculated error rates for plotting.
-str(liver.fit.ERR.rates)
+```{r calc-error, echo=1, results='hold'}
+ERR <- round(Error.rate.f(Classif.table), digits = 4)
+FNR <- round(sum(liver$severity == "1")/length(liver$severity), digits = 4)
+print(paste(c(sprintf("Total error rate (p >= %s): %s", 
+              p.threshold, 
+              ERR), 
+        sprintf("False negative error rate (p >= %s): %s", 
+              p.threshold, 
+              FNR)), sep="\n"))
 ```
 ```{r plot-errors}
-plot.ERRvsThreshold(
-  FPRs = liver.fit.ERR.rates$FalsePos.rate,
-  FNRs = liver.fit.ERR.rates$FalseNeg.rate,
-  ERRs = liver.fit.ERR.rates$TotalErr.rate,
-  P.Thresholds = liver.fit.ERR.rates$P.Thresholds,
-  limit = c(0.0, 1.0)
+liver.ERR.rates <- All.error.rates.f(
+  Truth = (liver$severity == "1"),
+  Pred = liver.fit$fitted
 )
+Plot.Error.f(lista = liver.ERR.rates, cex=1.4)
 ```
 
+As shown by the plot, the total error rate is optimized when the threshold is $\approx 0.516$. The misclassification for the optimal case:
+
+```{r optimal-case, message=FALSE}
+p.threshold = 0.516
+liver.prediction <- (liver.fit$fitted >= p.threshold)
+liver.truth <- map.where(liver$severity == "1")
+Classif.table <- table(liver.prediction, liver.truth)
+kable(Classif.table)
+```
+## Cross-Valdiation {.tabset}
+
+```{r cross-validation-funcs, include=FALSE}
+# Get the CV.error for the data.
+CV.error.f <- function(data, k=10, t1=0, t2=1, m=20, rounds=2) {
+  
+  # k-fold CV; uses m=100 thresholds from t1 to t2:
+  P.Thresholds <- seq(from=t1, to=t2, length=m)
+  
+  # Initialize the cost array:
+  Cost.arr <- array(0,c(m, rounds, k))
+  
+  # Perform cross-validation "Rounds" times.
+  for (i in 1:rounds) {
+    
+    # Sample data with repetitions k-times.
+    fold=sample(rep(1:k,length=nrow(data)))
+    
+    # Perform j out of k folds.
+    for (j in 1:k) {
+      # Get the current fold:
+      cond <- (fold==j)
+      train_data <- data[!cond,]
+      test_data <- data[cond,]
+      
+      # Fit the logistic regression model:
+      obj <- glm(severity ~ ., data = train_data, family = "binomial")
+      
+      # Get the predictions:
+      data.pred.proba <- predict(obj, newdata = test_data, type = "response")
+      
+      # Get logical truth:
+      data.truth <- (test_data$severity == "1")
+      
+      # For each threshold, calculate the cost.
+      for (ind in 1:m) {
+        
+        # Get the predicted label.
+        data.pred <- (data.pred.proba >= P.Thresholds[ind])
+        
+        # Get weighted average of false neg class + truth.
+        fn.avg <- mean((data.pred == FALSE) & (data.truth == TRUE)) * 10
+        fp.avg <- mean((data.pred == TRUE) & (data.truth == FALSE))
+        
+        # Calculate the cost.
+        Cost.arr[ind, i, j] <- fn.avg + fp.avg
+        
+        # Cost.arr[ind,i,j] <- mean((prediction==F)&(Truth==T))*10 +
+        #  mean((prediction==T)&(Truth==F)) # not using "table"
+      }
+    }
+  }
+  list(Cost=Cost.arr, Threshold=P.Thresholds)
+}
+
+Plot.CV.Cost.f <- function(lista=CV.error.list,from=0, to=1) {
+  Threshold <- lista$Threshold
+  cond <- ((Threshold>=from)&(Threshold<=to)) # range
+  Threshold <- Threshold[cond]
+  Cost.arr <- lista$Cost[cond,,]
+  N <- prod(dim(Cost.arr)[2:3]) # Rounds*k
+  cost <- apply(Cost.arr,1,mean)
+  cost.se <- apply(Cost.arr,1,sd)/sqrt(N)
+  low <- cost - 2*cost.se;   high <- cost + 2*cost.se
+  mat <- cbind(cost,low,high)
+  # now calculating the optimal threshold
+  min.val <- min(cost)
+  ind <- match(min.val, cost) # Threshold[ind] is the optimal threshold
+  par(mar = c(4.5,4.5,0,1))
+  matplot(Threshold,mat,type="l", xlab=paste("Threshold (optimal at ",
+      round(Threshold[ind],3),")"), ylab="Cost of Misclassification",lty=c(1,2,2))
+  abline(h=min.val, lty=2);
+  abline(v=Threshold[ind], lty=2)
+  list(min.Cost=min.val, min.Threshold=Threshold[ind]) # the optimal threshold in case we need it
+}
+```
+
+```{r cross-validation-summary-funcs, include=FALSE}
+
+# Calculate CV Misclassification table for a fixed threshold.
+CV.table.f <- function(data, k = 10, rounds = 5, P.Threshold = 0.5) {
+  # k-fold CV for the optimal threshold.
+  Classif.table.arr <- array(0, c(2, 2, rounds, k))
+  
+  # For each round...
+  for(i in 1:rounds) {
+    # Sample data with repetitions k-times.
+    fold=sample(rep(1:k,length=nrow(data)))
+    
+    # For each fold...
+    for(j in 1:k) {
+      
+      # Get the current fold:
+      cond <- (fold==j)
+      train_data <- data[!cond,]
+      test_data <- data[cond,]
+      
+      # Fit the logistic regression model:
+      obj <- glm(severity ~ ., data = train_data, family = "binomial")
+      
+      # Get the predictions:
+      data.pred.proba <- predict(obj, newdata = test_data, type = "response")
+      
+      # Get logical truth:
+      data.truth <- (test_data$severity == "1")
+      
+      # Get the prediction label at optimal threshold.
+      data.pred <- (data.pred.proba >= P.Threshold)
+      
+      # Form the classification table.
+      Classif.table.arr[,,i,j] <- table(data.pred, data.truth)
+    }
+  }
+  
+  # Return the table.
+  return(Classif.table.arr)
+}
+
+Summary.CV.table.f <- function(arr=CV.table.arr) {
+  arr <- apply(arr, 1:3, sum) # Summarize the fold.
+  N <- dim(arr)[3]
+  table.mean <- apply(arr, 1:2, mean)
+  table.se <- apply(arr, 1:2, sd) / sqrt(N)
+  return(
+    list(
+      Mean=table.mean,
+      StErr=table.se
+    )
+  )
+}
+
+```
+
+We use the following settings for our CV runs:
+
+```{r setup-cv}
+k.folds = c(10,3)
+t.limit = c(0.001, 1.0)
+n.thresholds = 200
+n.rounds = 100
+```
+
+
+### $k = 10$ -fold CV
+
+Below is a 10-fold cross-validation, using 100 rounds:
+
+```{r ten-fold-cv, echo=FALSE, results='asis'}
+# Plot k = 10 fold, 100 rounds:
+CV.error.list <- CV.error.f(liver, k = k.folds[1], t1 = t.limit[1], t2 = t.limit[2], m = n.thresholds, rounds = n.rounds)
+results <- Plot.CV.Cost.f(CV.error.list)
+kable(as.data.frame(results), 
+      col.names = c(
+        min.Cost = "Minimum Cost", 
+        min.Threshold = "Minimum Threshold"))
+```
+
+```{r summary-ten-fold, echo=FALSE, results='hold'}
+CV.ten.table.arr <- CV.table.f(liver, k = k.folds[1], 
+                               rounds = n.rounds, 
+                               P.Threshold = results$min.Threshold)
+print(Summary.CV.table.f(arr=CV.ten.table.arr))
+```
+
+
+
+### $k = 3$ -fold CV
+
+Below is a 3-fold cross-validation, using 100 rounds:
+
+```{r three-fold-cv, echo=FALSE, results='asis'}
+# Plot k = 3 fold, 100 rounds:
+CV.error.list2 <- CV.error.f(liver, k = k.folds[2], t1 = t.limit[1], t2 = t.limit[2], m = n.thresholds, rounds = n.rounds)
+results2 <- Plot.CV.Cost.f(CV.error.list2)
+kable(as.data.frame(results2), col.names = c(min.Cost = "Minimum Cost", min.Threshold = "Minimum Threshold"))
+```
+
+```{r summary-three-fold, echo=FALSE, results='hold'}
+CV.three.table.arr <- CV.table.f(liver, k = k.folds[2], 
+                               rounds = n.rounds, 
+                               P.Threshold = results2$min.Threshold)
+print(Summary.CV.table.f(arr=CV.three.table.arr))
+```
 <!-- PAGE BREAK -->
 \newpage
 
