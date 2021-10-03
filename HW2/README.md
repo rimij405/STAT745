@@ -16,7 +16,10 @@ This package contains 2 datasets:
 ## Installation
 
 ```R
-# Install the development version of the package using devtools
+# Install the development version of the package using devtools.
+devtools::install_github("rimij405/HW2", subdir="HW2", ref="homework2")
+
+# Install from the exported *.zip locally.
 devtools::load_all("RIT.STAT745.HW2")
 ```
 
