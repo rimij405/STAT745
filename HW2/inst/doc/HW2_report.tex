@@ -40,6 +40,7 @@
 \IfFileExists{bookmark.sty}{\usepackage{bookmark}}{\usepackage{hyperref}}
 \hypersetup{
   pdftitle={Homework 2 Report},
+  pdfauthor={Ian Effendi},
   colorlinks=true,
   linkcolor=Maroon,
   filecolor=Maroon,
@@ -128,8 +129,8 @@
 \makeatother
 \subtitle{Classification of liver malfunction severity (Logistic
 Regression)}
-\author{true}
-\date{September 20, 2021}
+\author{Ian Effendi}
+\date{September 14, 2021}
 
 \begin{document}
 \maketitle
@@ -139,6 +140,15 @@ Regression)}
 \setcounter{tocdepth}{3}
 \tableofcontents
 }
+\hypertarget{certification}{%
+\subsection{Certification}\label{certification}}
+
+\begin{quote}
+I certify that I indeed finished reading Ch. 3 from \emph{An
+Introduction to Statistical Learning}, by James Gareth, Daniela Witten,
+Trevor Hastie, Robert Tibshirani.
+\end{quote}
+
 \hypertarget{overview}{%
 \subsection{Overview}\label{overview}}
 
@@ -164,9 +174,11 @@ for data analysis, with the following package requirements:
 
 \begin{Shaded}
 \begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(reshape2)}
 \FunctionTok{library}\NormalTok{(dplyr)}
 \FunctionTok{library}\NormalTok{(forcats)}
 \FunctionTok{library}\NormalTok{(ggplot2)}
+\FunctionTok{library}\NormalTok{(corrplot)}
 \end{Highlighting}
 \end{Shaded}
 
@@ -321,370 +333,118 @@ not severe & 2 & 0 \\
 \begin{Highlighting}[]
 \NormalTok{liver }\OtherTok{\textless{}{-}}\NormalTok{ liver\_data }\SpecialCharTok{\%\textgreater{}\%}
   \FunctionTok{mutate}\NormalTok{(}\AttributeTok{severity =} \FunctionTok{fct\_recode}\NormalTok{(severity,}
-    \StringTok{"1"} \OtherTok{=} \StringTok{"1"}\NormalTok{,}
-    \StringTok{"0"} \OtherTok{=} \StringTok{"2"}
-\NormalTok{  ))}
-\NormalTok{liver }\SpecialCharTok{\%\textgreater{}\%}  \FunctionTok{select}\NormalTok{(severity)}
+    \StringTok{"0"} \OtherTok{=} \StringTok{"2"}\NormalTok{,}
+    \StringTok{"1"} \OtherTok{=} \StringTok{"1"}
+\NormalTok{  )) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{mutate}\NormalTok{(}\AttributeTok{severity =} \FunctionTok{fct\_rev}\NormalTok{(severity))}
+
+\FunctionTok{print}\NormalTok{(}\FunctionTok{paste}\NormalTok{(}\FunctionTok{c}\NormalTok{(}\StringTok{"Levels in \textasciigrave{}liver$severity\textasciigrave{}: "}\NormalTok{, }\FunctionTok{levels}\NormalTok{(liver}\SpecialCharTok{$}\NormalTok{severity)), }\AttributeTok{collapse =} \StringTok{" "}\NormalTok{))}
+\CommentTok{\# [1] "Levels in \textasciigrave{}liver$severity\textasciigrave{}:  0 1"}
 \end{Highlighting}
 \end{Shaded}
-
-\begin{longtable}[]{@{}l@{}}
-\toprule
-severity \\
-\midrule
-\endhead
-1 \\
-0 \\
-0 \\
-0 \\
-0 \\
-0 \\
-1 \\
-1 \\
-1 \\
-1 \\
-1 \\
-1 \\
-1 \\
-1 \\
-1 \\
-1 \\
-1 \\
-1 \\
-1 \\
-1 \\
-1 \\
-1 \\
-1 \\
-1 \\
-1 \\
-1 \\
-1 \\
-1 \\
-1 \\
-1 \\
-1 \\
-1 \\
-1 \\
-1 \\
-1 \\
-0 \\
-0 \\
-0 \\
-0 \\
-0 \\
-0 \\
-0 \\
-0 \\
-0 \\
-0 \\
-0 \\
-0 \\
-0 \\
-0 \\
-0 \\
-0 \\
-0 \\
-0 \\
-0 \\
-0 \\
-0 \\
-0 \\
-0 \\
-0 \\
-0 \\
-0 \\
-0 \\
-0 \\
-0 \\
-1 \\
-1 \\
-0 \\
-0 \\
-0 \\
-0 \\
-1 \\
-1 \\
-1 \\
-1 \\
-1 \\
-1 \\
-0 \\
-0 \\
-0 \\
-0 \\
-0 \\
-0 \\
-0 \\
-0 \\
-0 \\
-0 \\
-0 \\
-0 \\
-1 \\
-1 \\
-1 \\
-1 \\
-1 \\
-1 \\
-1 \\
-1 \\
-0 \\
-0 \\
-0 \\
-0 \\
-0 \\
-0 \\
-1 \\
-1 \\
-1 \\
-1 \\
-1 \\
-1 \\
-1 \\
-0 \\
-0 \\
-0 \\
-0 \\
-0 \\
-0 \\
-0 \\
-0 \\
-0 \\
-0 \\
-0 \\
-0 \\
-0 \\
-0 \\
-0 \\
-0 \\
-0 \\
-0 \\
-0 \\
-0 \\
-0 \\
-1 \\
-1 \\
-0 \\
-0 \\
-0 \\
-0 \\
-0 \\
-0 \\
-0 \\
-0 \\
-1 \\
-1 \\
-1 \\
-1 \\
-1 \\
-1 \\
-1 \\
-1 \\
-1 \\
-1 \\
-0 \\
-0 \\
-0 \\
-0 \\
-0 \\
-0 \\
-0 \\
-0 \\
-0 \\
-0 \\
-0 \\
-0 \\
-0 \\
-0 \\
-0 \\
-0 \\
-1 \\
-1 \\
-0 \\
-1 \\
-1 \\
-1 \\
-1 \\
-1 \\
-1 \\
-1 \\
-0 \\
-0 \\
-0 \\
-0 \\
-0 \\
-1 \\
-1 \\
-0 \\
-0 \\
-0 \\
-0 \\
-0 \\
-1 \\
-1 \\
-1 \\
-1 \\
-0 \\
-1 \\
-1 \\
-1 \\
-1 \\
-1 \\
-1 \\
-1 \\
-1 \\
-1 \\
-1 \\
-1 \\
-1 \\
-1 \\
-1 \\
-1 \\
-1 \\
-1 \\
-1 \\
-1 \\
-1 \\
-1 \\
-1 \\
-1 \\
-1 \\
-0 \\
-0 \\
-0 \\
-0 \\
-0 \\
-0 \\
-0 \\
-0 \\
-0 \\
-0 \\
-0 \\
-0 \\
-0 \\
-0 \\
-0 \\
-0 \\
-0 \\
-0 \\
-0 \\
-0 \\
-0 \\
-0 \\
-0 \\
-0 \\
-0 \\
-0 \\
-1 \\
-1 \\
-1 \\
-1 \\
-1 \\
-1 \\
-0 \\
-0 \\
-0 \\
-0 \\
-0 \\
-1 \\
-1 \\
-1 \\
-1 \\
-1 \\
-1 \\
-1 \\
-1 \\
-1 \\
-0 \\
-0 \\
-0 \\
-0 \\
-0 \\
-0 \\
-0 \\
-0 \\
-1 \\
-1 \\
-1 \\
-0 \\
-0 \\
-0 \\
-0 \\
-1 \\
-0 \\
-0 \\
-0 \\
-0 \\
-0 \\
-0 \\
-0 \\
-0 \\
-0 \\
-0 \\
-0 \\
-0 \\
-0 \\
-0 \\
-0 \\
-0 \\
-0 \\
-0 \\
-0 \\
-0 \\
-0 \\
-0 \\
-0 \\
-0 \\
-0 \\
-0 \\
-0 \\
-0 \\
-1 \\
-1 \\
-1 \\
-1 \\
-1 \\
-1 \\
-1 \\
-1 \\
-1 \\
-1 \\
-1 \\
-0 \\
-0 \\
-0 \\
-0 \\
-0 \\
-0 \\
-1 \\
-1 \\
-1 \\
-1 \\
-1 \\
-0 \\
-0 \\
-0 \\
-0 \\
-0 \\
-1 \\
-1 \\
-0 \\
-0 \\
-0 \\
-0 \\
-1 \\
-0 \\
-1 \\
-1 \\
-1 \\
-\bottomrule
-\end{longtable}
 
 \newpage
 
 \hypertarget{eda}{%
 \subsection{EDA}\label{eda}}
+
+\hypertarget{explore}{%
+\subsubsection{Explore}\label{explore}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Structure of the dataframe.}
+\FunctionTok{dim}\NormalTok{(liver) }\CommentTok{\# 345 observations and 3 variables.}
+\CommentTok{\# [1] 345   7}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# X1 through X5 are blood test results.}
+\CommentTok{\# X6 is no. of alcoholic beverages drunk.}
+\CommentTok{\# X7 is severity response, encoded as "Group 1" = 1 and "Group 2" = 0}
+\FunctionTok{str}\NormalTok{(liver)}
+\CommentTok{\# tibble [345 x 7] (S3: tbl\_df/tbl/data.frame)}
+\CommentTok{\#  $ blood.1 : int [1:345] 85 85 86 91 87 98 88 88 92 90 ...}
+\CommentTok{\#  $ blood.2 : int [1:345] 92 64 54 78 70 55 62 67 54 60 ...}
+\CommentTok{\#  $ blood.3 : int [1:345] 45 59 33 34 12 13 20 21 22 25 ...}
+\CommentTok{\#  $ blood.4 : int [1:345] 27 32 16 24 28 17 17 11 20 19 ...}
+\CommentTok{\#  $ blood.5 : int [1:345] 31 23 54 36 10 17 9 11 7 5 ...}
+\CommentTok{\#  $ drinks  : num [1:345] 0 0 0 0 0 0 0.5 0.5 0.5 0.5 ...}
+\CommentTok{\#  $ severity: Factor w/ 2 levels "0","1": 2 1 1 1 1 1 2 2 2 2 ...}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{analyze}{%
+\subsubsection{Analyze}\label{analyze}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Summarize the blood test predictors.}
+\FunctionTok{summary}\NormalTok{(liver[,}\DecValTok{1}\SpecialCharTok{:}\DecValTok{5}\NormalTok{]) }\CommentTok{\# No units were provided with dataset.}
+\CommentTok{\#     blood.1          blood.2          blood.3      }
+\CommentTok{\#  Min.   : 65.00   Min.   : 23.00   Min.   :  4.00  }
+\CommentTok{\#  1st Qu.: 87.00   1st Qu.: 57.00   1st Qu.: 19.00  }
+\CommentTok{\#  Median : 90.00   Median : 67.00   Median : 26.00  }
+\CommentTok{\#  Mean   : 90.16   Mean   : 69.87   Mean   : 30.41  }
+\CommentTok{\#  3rd Qu.: 93.00   3rd Qu.: 80.00   3rd Qu.: 34.00  }
+\CommentTok{\#  Max.   :103.00   Max.   :138.00   Max.   :155.00  }
+\CommentTok{\#     blood.4         blood.5      }
+\CommentTok{\#  Min.   : 5.00   Min.   :  5.00  }
+\CommentTok{\#  1st Qu.:19.00   1st Qu.: 15.00  }
+\CommentTok{\#  Median :23.00   Median : 25.00  }
+\CommentTok{\#  Mean   :24.64   Mean   : 38.28  }
+\CommentTok{\#  3rd Qu.:27.00   3rd Qu.: 46.00  }
+\CommentTok{\#  Max.   :82.00   Max.   :297.00}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Summarize the alcoholic beverage predictor.}
+\FunctionTok{summary}\NormalTok{(liver[,}\DecValTok{6}\NormalTok{]) }
+\CommentTok{\#      drinks      }
+\CommentTok{\#  Min.   : 0.000  }
+\CommentTok{\#  1st Qu.: 0.500  }
+\CommentTok{\#  Median : 3.000  }
+\CommentTok{\#  Mean   : 3.455  }
+\CommentTok{\#  3rd Qu.: 6.000  }
+\CommentTok{\#  Max.   :20.000}
+\CommentTok{\# Median: 3 drinks, Mean: 3.5 drinks, skewed by Max: 20 drinks.}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Summarize the severity.}
+\FunctionTok{summary}\NormalTok{(liver[,}\DecValTok{7}\NormalTok{])}
+\CommentTok{\#  severity}
+\CommentTok{\#  0:200   }
+\CommentTok{\#  1:145}
+\CommentTok{\# num(Group 2) \textgreater{} num(Group 1)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Boxplot shows smaller median, wider spread in severe cases.}
+\CommentTok{\# Drinks may not be a strong predictor of liver malfunction.}
+\FunctionTok{ggplot}\NormalTok{(}\AttributeTok{data =}\NormalTok{ liver, }\AttributeTok{mapping =} \FunctionTok{aes}\NormalTok{(}\AttributeTok{x =}\NormalTok{ severity, }\AttributeTok{y =}\NormalTok{ drinks)) }\SpecialCharTok{+}
+  \FunctionTok{geom\_boxplot}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{C:/Users/effen/OneDrive/DOCUME~1/RIT/STAT74~1/Homework/HW2/inst/doc/HW2_RE~1/figure-latex/plot-drinks-severity-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# blood.3 and blood.4 demonstrate multicollinearity.}
+\FunctionTok{pairs}\NormalTok{(liver }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{select}\NormalTok{(}\SpecialCharTok{{-}}\NormalTok{severity))}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{C:/Users/effen/OneDrive/DOCUME~1/RIT/STAT74~1/Homework/HW2/inst/doc/HW2_RE~1/figure-latex/plot-collinearity-1.pdf}
 
 \newpage
 
@@ -694,6 +454,9 @@ severity \\
 For this classification problem, we want to predict whether or not a
 patient's liver malfunction will be severe, given the predictors
 available in the dataset.
+
+\hypertarget{theory}{%
+\subsubsection{Theory}\label{theory}}
 
 The probability of a test observation having the positive class label
 outcome (``Group 1'') is described by \(p\) as such:
@@ -716,6 +479,203 @@ ln[\frac{p}{(1-p)}] = \beta_0 + \beta_1(blood.1) + \cdots + \beta_5(blood.5) + \
 We will predict \(severity = 1\) if \(p >= \pi_0\) and as \(0\)
 otherwise. \(\pi_0\) represents some arbitrary threshold probability we
 can select, but we'll begin with \(\pi_0 = 0.5\).
+
+\hypertarget{model-fitting}{%
+\subsubsection{Model Fitting}\label{model-fitting}}
+
+We can fit a logistic regression model with Group 1 as the positive
+class as follows:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{liver.fit }\OtherTok{\textless{}{-}} \FunctionTok{glm}\NormalTok{(}
+\NormalTok{  severity }\SpecialCharTok{\textasciitilde{}}\NormalTok{ .,}
+  \CommentTok{\# Equivalent to:  severity \textasciitilde{} blood.1 + blood.2 + blood.3 + blood.4 + blood.5 + drinks, }
+  \AttributeTok{data =}\NormalTok{ liver,}
+  \AttributeTok{family =} \StringTok{"binomial"}
+\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{summary}\NormalTok{(liver.fit)}
+\CommentTok{\# }
+\CommentTok{\# Call:}
+\CommentTok{\# glm(formula = severity \textasciitilde{} ., family = "binomial", data = liver)}
+\CommentTok{\# }
+\CommentTok{\# Deviance Residuals: }
+\CommentTok{\#     Min       1Q   Median       3Q      Max  }
+\CommentTok{\# {-}1.9635  {-}0.9652  {-}0.5912   1.0482   2.4190  }
+\CommentTok{\# }
+\CommentTok{\# Coefficients:}
+\CommentTok{\#              Estimate Std. Error z value Pr(\textgreater{}|z|)    }
+\CommentTok{\# (Intercept) {-}5.990258   2.685458  {-}2.231 0.025706 *  }
+\CommentTok{\# blood.1      0.063984   0.029645   2.158 0.030901 *  }
+\CommentTok{\# blood.2      0.019525   0.006759   2.889 0.003870 ** }
+\CommentTok{\# blood.3      0.064106   0.012300   5.212 1.87e{-}07 ***}
+\CommentTok{\# blood.4     {-}0.123198   0.024273  {-}5.076 3.86e{-}07 ***}
+\CommentTok{\# blood.5     {-}0.018947   0.005602  {-}3.382 0.000719 ***}
+\CommentTok{\# drinks       0.068080   0.040380   1.686 0.091795 .  }
+\CommentTok{\# {-}{-}{-}}
+\CommentTok{\# Signif. codes:  }
+\CommentTok{\# 0 \textquotesingle{}***\textquotesingle{} 0.001 \textquotesingle{}**\textquotesingle{} 0.01 \textquotesingle{}*\textquotesingle{} 0.05 \textquotesingle{}.\textquotesingle{} 0.1 \textquotesingle{} \textquotesingle{} 1}
+\CommentTok{\# }
+\CommentTok{\# (Dispersion parameter for binomial family taken to be 1)}
+\CommentTok{\# }
+\CommentTok{\#     Null deviance: 469.47  on 344  degrees of freedom}
+\CommentTok{\# Residual deviance: 411.01  on 338  degrees of freedom}
+\CommentTok{\# AIC: 425.01}
+\CommentTok{\# }
+\CommentTok{\# Number of Fisher Scoring iterations: 5}
+\end{Highlighting}
+\end{Shaded}
+
+The fitted model summary suggests \texttt{drinks} is not a significant
+predictor of severity outcomes, but
+\texttt{blood.1\textasciitilde{}blood.5} all appear to play an important
+effect on the response.
+
+\hypertarget{model-performance}{%
+\subsubsection{Model Performance}\label{model-performance}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# See "R/utils{-}confmat.R" for helper function definitions.}
+\CommentTok{\# Find predictions and make misclassification table.}
+\NormalTok{p.threshold }\OtherTok{=} \FloatTok{0.5}
+\NormalTok{liver.prediction }\OtherTok{\textless{}{-}}\NormalTok{ (liver.fit}\SpecialCharTok{$}\NormalTok{fitted }\SpecialCharTok{\textgreater{}=}\NormalTok{ p.threshold)}
+\NormalTok{liver.truth }\OtherTok{\textless{}{-}} \FunctionTok{map.where}\NormalTok{(liver}\SpecialCharTok{$}\NormalTok{severity }\SpecialCharTok{==} \StringTok{"1"}\NormalTok{)}
+\NormalTok{Classif.table }\OtherTok{\textless{}{-}} \FunctionTok{table}\NormalTok{(liver.prediction, liver.truth)}
+\FunctionTok{kable}\NormalTok{(Classif.table)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{longtable}[]{@{}lrr@{}}
+\toprule
+& FALSE & TRUE \\
+\midrule
+\endhead
+FALSE & 165 & 67 \\
+TRUE & 35 & 78 \\
+\bottomrule
+\end{longtable}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{ERR }\OtherTok{\textless{}{-}} \FunctionTok{round}\NormalTok{(}\FunctionTok{Error.rate.f}\NormalTok{(Classif.table), }\AttributeTok{digits =} \DecValTok{4}\NormalTok{)}
+\CommentTok{\# [1] "Total error rate (p \textgreater{}= 0.5): 0.2957"         }
+\CommentTok{\# [2] "False negative error rate (p \textgreater{}= 0.5): 0.4203"}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{liver.ERR.rates }\OtherTok{\textless{}{-}} \FunctionTok{All.error.rates.f}\NormalTok{(}
+  \AttributeTok{Truth =}\NormalTok{ (liver}\SpecialCharTok{$}\NormalTok{severity }\SpecialCharTok{==} \StringTok{"1"}\NormalTok{),}
+  \AttributeTok{Pred =}\NormalTok{ liver.fit}\SpecialCharTok{$}\NormalTok{fitted}
+\NormalTok{)}
+\FunctionTok{Plot.Error.f}\NormalTok{(}\AttributeTok{lista =}\NormalTok{ liver.ERR.rates, }\AttributeTok{cex=}\FloatTok{1.4}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{C:/Users/effen/OneDrive/DOCUME~1/RIT/STAT74~1/Homework/HW2/inst/doc/HW2_RE~1/figure-latex/plot-errors-1.pdf}
+
+As shown by the plot, the total error rate is optimized when the
+threshold is \(\approx 0.516\). The misclassification for the optimal
+case:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{p.threshold }\OtherTok{=} \FloatTok{0.516}
+\NormalTok{liver.prediction }\OtherTok{\textless{}{-}}\NormalTok{ (liver.fit}\SpecialCharTok{$}\NormalTok{fitted }\SpecialCharTok{\textgreater{}=}\NormalTok{ p.threshold)}
+\NormalTok{liver.truth }\OtherTok{\textless{}{-}} \FunctionTok{map.where}\NormalTok{(liver}\SpecialCharTok{$}\NormalTok{severity }\SpecialCharTok{==} \StringTok{"1"}\NormalTok{)}
+\NormalTok{Classif.table }\OtherTok{\textless{}{-}} \FunctionTok{table}\NormalTok{(liver.prediction, liver.truth)}
+\FunctionTok{kable}\NormalTok{(Classif.table)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{longtable}[]{@{}lrr@{}}
+\toprule
+& FALSE & TRUE \\
+\midrule
+\endhead
+FALSE & 170 & 68 \\
+TRUE & 30 & 77 \\
+\bottomrule
+\end{longtable}
+
+\hypertarget{cross-valdiation}{%
+\subsection{Cross-Valdiation}\label{cross-valdiation}}
+
+We use the following settings for our CV runs:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{k.folds }\OtherTok{=} \FunctionTok{c}\NormalTok{(}\DecValTok{10}\NormalTok{,}\DecValTok{3}\NormalTok{)}
+\NormalTok{t.limit }\OtherTok{=} \FunctionTok{c}\NormalTok{(}\FloatTok{0.001}\NormalTok{, }\FloatTok{1.0}\NormalTok{)}
+\NormalTok{n.thresholds }\OtherTok{=} \DecValTok{200}
+\NormalTok{n.rounds }\OtherTok{=} \DecValTok{100}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{k-10--fold-cv}{%
+\subsubsection{\texorpdfstring{\(k = 10\) -fold
+CV}{k = 10 -fold CV}}\label{k-10--fold-cv}}
+
+Below is a 10-fold cross-validation, using 100 rounds:
+
+\includegraphics{C:/Users/effen/OneDrive/DOCUME~1/RIT/STAT74~1/Homework/HW2/inst/doc/HW2_RE~1/figure-latex/ten-fold-cv-1.pdf}
+
+\begin{longtable}[]{@{}rr@{}}
+\toprule
+Minimum Cost & Minimum Threshold \\
+\midrule
+\endhead
+0.5709235 & 0.0110402 \\
+\bottomrule
+\end{longtable}
+
+\begin{verbatim}
+# $Mean
+#        [,1]   [,2]
+# [1,] 142.08 138.76
+# [2,] 157.87 144.97
+# 
+# $StErr
+#           [,1]       [,2]
+# [1,] 1.3401854 1.37239156
+# [2,] 0.8632397 0.01714466
+\end{verbatim}
+
+\hypertarget{k-3--fold-cv}{%
+\subsubsection{\texorpdfstring{\(k = 3\) -fold
+CV}{k = 3 -fold CV}}\label{k-3--fold-cv}}
+
+Below is a 3-fold cross-validation, using 100 rounds:
+
+\includegraphics{C:/Users/effen/OneDrive/DOCUME~1/RIT/STAT74~1/Homework/HW2/inst/doc/HW2_RE~1/figure-latex/three-fold-cv-1.pdf}
+
+\begin{longtable}[]{@{}rr@{}}
+\toprule
+Minimum Cost & Minimum Threshold \\
+\midrule
+\endhead
+0.574029 & 0.0060201 \\
+\bottomrule
+\end{longtable}
+
+\begin{verbatim}
+# $Mean
+#        [,1]   [,2]
+# [1,]  77.25  74.77
+# [2,] 177.99 144.94
+# 
+# $StErr
+#          [,1]       [,2]
+# [1,] 3.620324 3.66076260
+# [2,] 1.247583 0.02386833
+\end{verbatim}
 
 \newpage
 
@@ -748,29 +708,32 @@ relative to the project root.}
 # [6] methods   base     
 # 
 # other attached packages:
-# [1] RIT.STAT745.HW2_0.1.1 ggplot2_3.3.5        
-# [3] forcats_0.5.1         dplyr_1.0.7          
-# [5] rprojroot_2.0.2       knitr_1.36           
+# [1] RIT.STAT745.HW2_0.1.1 corrplot_0.90        
+# [3] ggplot2_3.3.5         forcats_0.5.1        
+# [5] dplyr_1.0.7           reshape2_1.4.4       
+# [7] rprojroot_2.0.2       knitr_1.36           
 # 
 # loaded via a namespace (and not attached):
-#  [1] tidyselect_1.1.1 xfun_0.26        bslib_0.3.0     
-#  [4] purrr_0.3.4      colorspace_2.0-2 vctrs_0.3.8     
-#  [7] generics_0.1.0   usethis_2.0.1    htmltools_0.5.2 
-# [10] yaml_2.2.1       utf8_1.2.2       rlang_0.4.11    
-# [13] pillar_1.6.3     jquerylib_0.1.4  glue_1.4.2      
-# [16] withr_2.4.2      DBI_1.1.1        bit64_4.0.5     
-# [19] lifecycle_1.0.1  stringr_1.4.0    munsell_0.5.0   
-# [22] gtable_0.3.0     codetools_0.2-18 evaluate_0.14   
-# [25] tzdb_0.1.2       fastmap_1.1.0    parallel_4.1.1  
-# [28] fansi_0.5.0      highr_0.9        readr_2.0.2     
-# [31] renv_0.14.0      scales_1.1.1     desc_1.4.0      
-# [34] vroom_1.5.5      jsonlite_1.7.2   fs_1.5.0        
-# [37] bit_4.0.4        hms_1.1.1        digest_0.6.28   
-# [40] stringi_1.7.4    grid_4.1.1       cli_3.0.1       
-# [43] tools_4.1.1      magrittr_2.0.1   sass_0.4.0      
-# [46] tibble_3.1.3     crayon_1.4.1     pkgconfig_2.0.3 
-# [49] ellipsis_0.3.2   assertthat_0.2.1 rmarkdown_2.11  
-# [52] rstudioapi_0.13  R6_2.5.1         compiler_4.1.1
+#  [1] tinytex_0.34     bslib_0.3.0      tidyselect_1.1.1
+#  [4] xfun_0.26        purrr_0.3.4      colorspace_2.0-2
+#  [7] vctrs_0.3.8      generics_0.1.0   htmltools_0.5.2 
+# [10] usethis_2.0.1    yaml_2.2.1       utf8_1.2.2      
+# [13] rlang_0.4.11     jquerylib_0.1.4  pillar_1.6.3    
+# [16] glue_1.4.2       withr_2.4.2      DBI_1.1.1       
+# [19] bit64_4.0.5      lifecycle_1.0.1  plyr_1.8.6      
+# [22] stringr_1.4.0    munsell_0.5.0    gtable_0.3.0    
+# [25] codetools_0.2-18 evaluate_0.14    labeling_0.4.2  
+# [28] fastmap_1.1.0    tzdb_0.1.2       parallel_4.1.1  
+# [31] fansi_0.5.0      highr_0.9        Rcpp_1.0.7      
+# [34] readr_2.0.2      renv_0.14.0      scales_1.1.1    
+# [37] desc_1.4.0       jsonlite_1.7.2   vroom_1.5.5     
+# [40] farver_2.1.0     fs_1.5.0         bit_4.0.4       
+# [43] hms_1.1.1        digest_0.6.28    stringi_1.7.4   
+# [46] grid_4.1.1       cli_3.0.1        tools_4.1.1     
+# [49] sass_0.4.0       magrittr_2.0.1   tibble_3.1.3    
+# [52] crayon_1.4.1     pkgconfig_2.0.3  ellipsis_0.3.2  
+# [55] assertthat_0.2.1 rmarkdown_2.11   rstudioapi_0.13 
+# [58] R6_2.5.1         compiler_4.1.1
 \end{verbatim}
 
 \end{document}

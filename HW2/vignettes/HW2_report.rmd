@@ -2,10 +2,9 @@
 # Document metadata information:
 title: "Homework 2 Report"
 subtitle: Classification of liver malfunction severity (Logistic Regression)
-author:
-  name: "Ian Effendi"
-  email: iae2784@rit.edu
-date: September 20, 2021
+author: "Ian Effendi"
+email: iae2784@rit.edu
+date: September 14, 2021
 # Output formats:
 output:
   # Output as a previewable HTML Notebook.
