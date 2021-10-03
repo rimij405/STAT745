@@ -1,21 +1,316 @@
 ---
-title: "R Notebook"
-output: html_notebook
+# Document metadata information:
+title: "Homework 2 Report"
+subtitle: Classification of liver malfunction severity (Logistic Regression)
+author:
+  name: "Ian Effendi"
+  email: iae2784@rit.edu
+date: September 20, 2021
+# Output formats:
+output:
+  # Output as a previewable HTML Notebook.
+  html_notebook:
+    theme: lumen
+    highlight: tango
+    df_print: paged
+    toc: true
+    toc_depth: 3
+    toc_float: true
+  # Output as an rmarkdown::pdf_document()
+  pdf_document:
+    keep_tex: true
+    highlight: tango
+    fig_caption: true
+    df_print: kable
+    toc: true
+    toc_depth: 3
+# Package vignette options:
+vignette: >
+  %\VignetteIndexEntry{Homework 2 Report}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+# pandoc -> pdfLaTeX rendering options:
+fontsize: 11pt
+geometry:
+  - margin=1in
+  - heightrounded
+documentclass: scrartcl
+papersize: a4
+urlcolor: violet
+toccolor: blue
+# Custom knit function.
+knit: (function(inputFile, encoding){
+  rmarkdown::render(inputFile, encoding = encoding, 
+  output_dir = "inst/doc", 
+  output_format="all") })
 ---
 
-This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+```{r setup, include=FALSE}
+# Install necessary dependencies.
+library(knitr)
+library(rprojroot)
 
-Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
+# Setup the document settings.
+knitr::opts_knit$set(
+  # Set the working directory to the project root.
+  root.dir = rprojroot::find_rstudio_root_file()
+)
 
-```{r}
-library(ggplot2)
+# Setup the chunk options.
+knitr::opts_chunk$set(
+  cache = TRUE,
+  collapse = TRUE,
+  echo = TRUE,
+  warning = TRUE,
+  message = TRUE,
+  comment = "#",
+  R.options = list(width = 60)
+)
 
-ggplot(data = iris, aes( x = Sepal.Length, y = Petal.Length, colour = Species)) +
-  geom_point()
+# Read chunks from external scripts.
+knitr::read_chunk('./../data-raw/liver_data.R')
+knitr::read_chunk('./../data-raw/severity_map.R')
+knitr::read_chunk('./../R/utils-confmat.R')
+knitr::read_chunk('./../R/utils-lec3.R')
 ```
 
-Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
+## Certification
 
-When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
+> I certify that I indeed finished reading Ch. 3 from *An Introduction to Statistical Learning*, by James Gareth, Daniela Witten, Trevor Hastie, Robert Tibshirani.
 
-The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
+## Overview
+
+<!-- This section provides an overview of the report. -->
+
+In this assignment we will:
+
+- Extract, load, and transform (*ELT*) the `Liver.txt` dataset.
+- Perform exploratory data analysis (*EDA*) on the dataset.
+- Fit and analyze a logistic regression model on the dataset.
+- Perform multiple cross-validation tasks at different k-fold values ($k = 3,\, k = 10$).
+
+This report was generated as a vignette in a formal [R Package](https://r-pkgs.org/intro.html) structured specifically for data analysis, with the following package requirements:
+
+<!-- This chunk loads the packages and stops output -->
+```{r load-packages, echo=FALSE, include=FALSE}
+library(reshape2)
+library(dplyr)
+library(forcats)
+library(ggplot2)
+library(corrplot)
+```
+
+<!-- This chunk just displays the packages without evaluation -->
+```{r show-packages, ref.label="load-packages", collapse=TRUE, eval=FALSE}
+```
+
+## ELT {.tabset}
+
+The `Liver.txt` file contains a header-less set of comma-separated fields, with one record per newline.
+
+### Extraction
+
+We begin by getting the filepath for `Liver.txt`, which is stored in the package's `inst/extdata` folder:
+
+```{r find-liver-txt}
+```
+
+Next, we prepare the column names:
+
+```{r prep-liver-names}
+```
+
+Then, we prepare the column types:
+
+```{r prep-liver-types}
+```
+
+Now we extract and save the `Liver.txt` file to place in our `data/` folder as a `liver_data.rda` file. This also allows us to refer to the data with `liver_data`.
+
+```{r read-liver-txt}
+```
+
+```{r save-liver-txt, results='hide'}
+```
+
+### Loading
+
+The `*.rda` data files are saved within the `data/` folder. When the package is installed (eg., `devtools::load_all("RIT.STAT745.HW2")` from the project directory), this attaches our `liver_data` tibble to the working environment:
+
+```{r preview-liver-txt}
+library(RIT.STAT745.HW2)
+
+str(liver_data)
+```
+### Transformation
+
+Transformation of the dataset is minimal. In our case we want to encode our response variable `severity` to properly mention our *positive* and *negative* class labels. We can trivally declare a lookup table that provides us with an adequate data dictionary:
+
+```{r make-severity-map, include=FALSE, results='hide'}
+```
+
+```{r preview-severity-map}
+severity_map
+```
+
+```{r encode-severity}
+liver <- liver_data %>%
+  mutate(severity = fct_recode(severity,
+    "0" = "2",
+    "1" = "1"
+  )) %>%
+  mutate(severity = fct_rev(severity))
+
+print(paste(c("Levels in `liver$severity`: ", levels(liver$severity)), collapse = " "))
+```
+
+<!-- PAGE BREAK -->
+\newpage
+
+## EDA {.tabset}
+
+### Explore
+
+```{r explore-dimensions}
+# Structure of the dataframe.
+dim(liver) # 345 observations and 3 variables.
+```
+```{r explore-structure}
+# X1 through X5 are blood test results.
+# X6 is no. of alcoholic beverages drunk.
+# X7 is severity response, encoded as "Group 1" = 1 and "Group 2" = 0
+str(liver)
+```
+
+### Analyze
+
+```{r analyze-tests}
+# Summarize the blood test predictors.
+summary(liver[,1:5]) # No units were provided with dataset.
+```
+
+```{r analyze-drinks}
+# Summarize the alcoholic beverage predictor.
+summary(liver[,6]) 
+# Median: 3 drinks, Mean: 3.5 drinks, skewed by Max: 20 drinks.
+```
+
+```{r analyze-severity}
+# Summarize the severity.
+summary(liver[,7])
+# num(Group 2) > num(Group 1)
+```
+
+```{r plot-drinks-severity}
+# Boxplot shows smaller median, wider spread in severe cases.
+# Drinks may not be a strong predictor of liver malfunction.
+ggplot(data = liver, mapping = aes(x = severity, y = drinks)) +
+  geom_boxplot()
+```
+```{r plot-collinearity}
+# blood.3 and blood.4 demonstrate multicollinearity.
+pairs(liver %>% select(-severity))
+```
+
+<!-- PAGE BREAK -->
+\newpage
+
+## Classification {.tabset}
+
+For this classification problem, we want to predict whether or not a patient's liver malfunction will be severe, given the predictors available in the dataset.
+
+### Theory
+
+The probability of a test observation having the positive class label outcome ("Group 1") is described by $p$ as such:
+
+$$
+p = Pr(Y = 1)
+$$
+Likewise, the probability of a test observation having the negative class label outcome ("Group 2") is described by $q$ as such:
+
+$$
+q = 1 - p = Pr(Y = 0)
+$$
+$severity$ can only take one of two values: $0$ or $1$. We denote $p = Pr(severity = 1)$ and we will fit a logistic regression model:
+
+$$
+ln[\frac{p}{(1-p)}] = \beta_0 + \beta_1(blood.1) + \cdots + \beta_5(blood.5) + \beta_6(drinks)
+$$
+
+We will predict $severity = 1$ if $p >= \pi_0$ and as $0$ otherwise. $\pi_0$ represents some arbitrary threshold probability we can select, but we'll begin with $\pi_0 = 0.5$.
+
+### Model Fitting
+
+We can fit a logistic regression model with Group 1 as the positive class as follows:
+
+```{r fit-model}
+liver.fit <- glm(
+  severity ~ .,
+  # Equivalent to:  severity ~ blood.1 + blood.2 + blood.3 + blood.4 + blood.5 + drinks, 
+  data = liver,
+  family = "binomial"
+)
+```
+
+```{r analyze-fit, echo=1:1}
+summary(liver.fit)
+```
+The fitted model summary suggests `drinks` is not a significant predictor of severity outcomes, but `blood.1~blood.5` all appear to play an important effect on the response.
+
+### Model Performance
+
+```{r confusion-matrix, include=FALSE}
+```
+
+
+```{r make-crosstable}
+# See "R/utils-confmat.R" for helper function definitions.
+# Find predictions and make misclassification table.
+p.threshold = 0.5
+liver.prediction <- (liver.fit$fitted >= p.threshold)
+liver.fit.metrics <- as.Classif.table(
+  y_pred = liver.prediction,
+  y_truth = map.where((liver$severity == "1")),
+  p.threshold = p.threshold
+)
+```
+
+```{r calc-error, echo=FALSE, results='hold'}
+liver.fit.ERR <- round(calc.ERR(liver.fit.metrics$table), digits = 4)
+kable(liver.fit.metrics$table)
+kable(liver.fit.ERR, col.names = c("Misclassification Error Rate (p = 0.5)"))
+```
+
+```{r classifier-utils, include=FALSE}
+```
+
+```{r calc-errors, results='hold'}
+liver.fit.ERR.rates <- calc.ERR.rates(
+  y_label = liver$severity,
+  y_pred = liver.fit$fitted,
+  pos = 1,
+  neg = 0
+)
+# Calculated error rates for plotting.
+str(liver.fit.ERR.rates)
+```
+```{r plot-errors}
+plot.ERRvsThreshold(
+  FPRs = liver.fit.ERR.rates$FalsePos.rate,
+  FNRs = liver.fit.ERR.rates$FalseNeg.rate,
+  ERRs = liver.fit.ERR.rates$TotalErr.rate,
+  P.Thresholds = liver.fit.ERR.rates$P.Thresholds,
+  limit = c(0.0, 1.0)
+)
+```
+
+<!-- PAGE BREAK -->
+\newpage
+
+## Session Information
+
+*This document was generated from an [R Markdown](http://rmarkdown.rstudio.com) Notebook (See the `vignettes/HW2_report.Rmd` in the package's sub-directory). The setup chunk for this document sets the root directory to the project root directory using the `rprojroot` package; all file paths are relative to the project root.*
+
+```{r session-info, echo=FALSE, results='markup', cache=FALSE}
+sessionInfo()
+```

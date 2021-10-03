@@ -7,7 +7,7 @@ Authors@R:
            role = c("aut", "cre"),
            email = "effendiian@gmail.com")
 Description: Completes the 2nd course assignment from RIT STAT 745, predictive analytics.
-License: Mozilla Public License 2.0 + LICENSE
+License: MPL (>=2) + file LICENSE
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
@@ -15,10 +15,14 @@ RoxygenNote: 7.1.2
 Depends:
   R (>= 2.10)
 Imports:
-  knitr,
-  rmarkdown,
-  rprojroot,
-  renv,
-  ggplot2,
-  readr,
-  dplyr
+    knitr,
+    formatR,
+    rmarkdown,
+    rprojroot,
+    renv,
+    ggplot2,
+    readr,
+    dplyr,
+    reshape2,
+    forcats,
+    magrittr

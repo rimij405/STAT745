@@ -1,4 +1,6 @@
-## code to prepare `severity_map` dataset goes here
+# code to prepare `severity_map` dataset goes here
+
+## ---- make-severity-map ----
 
 # Save the severity mapping table.
 severity_map <- dplyr::tribble(

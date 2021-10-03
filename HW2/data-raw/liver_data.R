@@ -1,8 +1,10 @@
-## code to prepare `Liver.txt` dataset goes here
+# code to prepare `Liver.txt` dataset goes here
 
 # Reference(s):
 # https://towardsdatascience.com/put-your-data-analysis-in-an-r-package-even-if-you-dont-publish-it-64f2bb8fd791
 # https://github.com/hadley/babynames/blob/master/data-raw/applicants.R
+
+## ---- find-liver-txt ----
 
 # Retrieve paths to data files.
 liver.filepath <- system.file(
@@ -11,6 +13,8 @@ liver.filepath <- system.file(
   package = "RIT.STAT745.HW2",
   mustWork = TRUE
 )
+
+## ---- prep-liver-names ----
 
 # Prepare the variable names.
 liver.variables <- c(
@@ -26,6 +30,8 @@ liver.variables <- c(
   "severity"
 )
 
+## ---- prep-liver-types ----
+
 # Prepare the variable types.
 liver.types <- readr::cols(
   # X1 through X5 - Quantitative blood test results.
@@ -40,6 +46,8 @@ liver.types <- readr::cols(
   readr::col_factor()
 )
 
+## ---- read-liver-txt ----
+
 # Read the dataset into memory.
 liver.txt <- readr::read_csv(
   # File is located in inst/extdata
@@ -49,6 +57,8 @@ liver.txt <- readr::read_csv(
   # Column types known in advance.
   col_types = liver.types
 )
+
+## ---- save-liver-txt ----
 
 # Store as tibble.
 liver_data <- dplyr::as_tibble(liver.txt)
