@@ -443,13 +443,6 @@
       "Repository": "CRAN",
       "Hash": "30e5eba91b67f7f4d75d31de14bbfbdc"
     },
-    "reshape": {
-      "Package": "reshape",
-      "Version": "0.8.8",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Hash": "0f4d941129e00ed34a7d192b1da7ccef"
-    },
     "reshape2": {
       "Package": "reshape2",
       "Version": "1.4.4",
