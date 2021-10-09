@@ -45,14 +45,10 @@ knit: (function(inputFile, encoding){
 ---
 
 ```{r setup, include=FALSE}
-# Install necessary dependencies.
-library(knitr)
-library(rprojroot)
-
 # Setup the document settings.
 knitr::opts_knit$set(
   # Set the working directory to the project root.
-  root.dir = rprojroot::find_rstudio_root_file()
+  root.dir = here::here()
 )
 
 # Setup the chunk options.
@@ -67,10 +63,10 @@ knitr::opts_chunk$set(
 )
 
 # Read chunks from external scripts.
-knitr::read_chunk('./../data-raw/liver_data.R')
-knitr::read_chunk('./../data-raw/severity_map.R')
-knitr::read_chunk('./../R/utils-confmat.R')
-knitr::read_chunk('./../R/utils-lec3.R')
+knitr::read_chunk(here::here('data-raw/liver_data.R'))
+knitr::read_chunk(here::here('data-raw/severity_map.R'))
+knitr::read_chunk(here::here('R/utils-confmat.R'))
+knitr::read_chunk(here::here('R/utils-lec3.R'))
 ```
 
 ## Certification
@@ -269,7 +265,7 @@ p.threshold = 0.5
 liver.prediction <- (liver.fit$fitted >= p.threshold)
 liver.truth <- map.where(liver$severity == "1")
 Classif.table <- table(liver.prediction, liver.truth)
-kable(Classif.table)
+knitr::kable(Classif.table)
 ```
 
 ```{r error-rate-funcs, include=FALSE, cache=FALSE}
@@ -286,7 +282,7 @@ print(paste(c(sprintf("Total error rate (p >= %s): %s",
               p.threshold, 
               FNR)), sep="\n"))
 ```
-```{r plot-errors}
+```{r plot-errors, fig.width=8, fig.height=6}
 liver.ERR.rates <- All.error.rates.f(
   Truth = (liver$severity == "1"),
   Pred = liver.fit$fitted
@@ -301,7 +297,7 @@ p.threshold = 0.516
 liver.prediction <- (liver.fit$fitted >= p.threshold)
 liver.truth <- map.where(liver$severity == "1")
 Classif.table <- table(liver.prediction, liver.truth)
-kable(Classif.table)
+knitr::kable(Classif.table)
 ```
 ## Cross-Valdiation {.tabset}
 
@@ -454,7 +450,7 @@ Below is a 10-fold cross-validation, using 100 rounds:
 # Plot k = 10 fold, 100 rounds:
 CV.error.list <- CV.error.f(liver, k = k.folds[1], t1 = t.limit[1], t2 = t.limit[2], m = n.thresholds, rounds = n.rounds)
 results <- Plot.CV.Cost.f(CV.error.list)
-kable(as.data.frame(results), 
+knitr::kable(as.data.frame(results), 
       col.names = c(
         min.Cost = "Minimum Cost", 
         min.Threshold = "Minimum Threshold"))
@@ -477,7 +473,7 @@ Below is a 3-fold cross-validation, using 100 rounds:
 # Plot k = 3 fold, 100 rounds:
 CV.error.list2 <- CV.error.f(liver, k = k.folds[2], t1 = t.limit[1], t2 = t.limit[2], m = n.thresholds, rounds = n.rounds)
 results2 <- Plot.CV.Cost.f(CV.error.list2)
-kable(as.data.frame(results2), col.names = c(min.Cost = "Minimum Cost", min.Threshold = "Minimum Threshold"))
+knitr::kable(as.data.frame(results2), col.names = c(min.Cost = "Minimum Cost", min.Threshold = "Minimum Threshold"))
 ```
 
 ```{r summary-three-fold, echo=FALSE, results='hold'}
