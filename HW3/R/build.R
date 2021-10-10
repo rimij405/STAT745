@@ -2,19 +2,24 @@
 #
 # Common functions for building / rendering.
 
+# Source the utility functions.
+source(here::here("R/utils.R"))
+
 ## ---- build-dataset ----
 
 # Build the dataset.
 # - Adds dataset files to cache.
 # - Adds the dataset to the global environment.
-make.dataset <- function(dataset = "liver_df") {
-  if (!exists(dataset)) {
+make.dataset <- function(dataset = "liver_df", cache = TRUE) {
+  if (!exists(dataset) || !cache) {
     # Depends on functions imported from `data-raw/liver.R`
     source(here::here("data-raw/liver.R"))
   } else {
     print("Dataset already exists.")
   }
-  print(liver_df)
+  assign(dataset, get.liver(name = dataset), envir = .GlobalEnv)
+  print(get(dataset))
+  return(get(dataset))
 }
 
 # Clean the dataset.
@@ -61,11 +66,6 @@ clean.dataset <- function(dataset = "liver_df") {
 }
 
 ## ---- build-report ----
-
-# Formatted print function.
-printf <- function(format, ...) {
-  print(sprintf(format, ...))
-}
 
 # Render the report with knitr, rmarkdown
 # into the output folder.
@@ -250,7 +250,6 @@ clean.report <- function(inputFile = "vignettes/HW3_report.Rmd",
       print("No files to remove.")
       return(NULL)
     }
-
     foreach::foreach(i = 1:length(files), .combine = "c") %dopar% remove.file(files[i])
   }
 
