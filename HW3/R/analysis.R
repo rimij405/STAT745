@@ -1,94 +1,128 @@
-# analysis.R
+# R/analysis.R
 #
 # Perform EDA on the Liver dataset.
 
 # Source the utility functions.
-source(here::here("R/build.R"))
+source(here::here("R/utils.R"))
 
-## ---- def-setup ----
+## ---- analysis-setup ----
 
-setup.analysis <- function(dataset = "liver", cache = TRUE) {
-  # Setup the analysis.
-  printf("Use cached dataset? %s", cache)
-  if (!cache) { clean.dataset(dataset = dataset) }
-  make.dataset(dataset = dataset, cache = cache)
-  df <- get(dataset)
-  printf("Use '%s' to access underlying tbl_df.", dataset)
-  printf("Dataset of type: '%s'.", class.format(df))
-  return(df)
-}
+# Source the setup script.
+source(here::here("R/analysis/setup.R"))
 
-## ---- def-makeresponse ----
+## ---- analysis-EDA ----
 
-make.response <- function(.data) {
-  printf("Recoding the response in the dataset.")
-  df <- .data
-  df <- df %>%
-    dplyr::mutate(
-      severity = forcats::fct_recode(
-        severity,
-        "Severe" = "1",
-        "Not Severe" = "2"
-      )
-    )
-  return(df)
-}
+# Source the EDA functions.
+source(here::here("R/analysis/eda.R"))
 
-## ---- def-makeshape ----
+## ---- analysis-model ----
 
-make.shape <- function(.data) {
-  # Get the dimensions.
-  d <- ncol(.data)
-  r <- nrow(.data)
-  shape <- list(
-    n_samples = r,
-    n_features = d
-  )
-  return(shape)
-}
+# Source the model function.
+source(here::here("R/analysis/model.R"))
 
-## ---- def-summarize ----
+## ---- analysis-metrics ----
 
-summarize.features <- function(.data, ..., d = ncol(.data)) {
-  print("Summarizing dataset features.")
-  s <- summary(.data[,-d])
-  return(s)
-}
+# Source the model function.
+source(here::here("R/analysis/metrics.R"))
 
-summarize.response <- function(.data, ..., d = ncol(.data)) {
-  print("Summarizing dataset response.")
-  s <- summary(.data[,d])
-  return(s)
-}
+## ---- analysis-validation ----
 
-corr.features <- function(.data, ..., d = ncol(.data)) {
-  data.corr <- cor(.data[,-d])
-  p <- corrplot::corrplot(data.corr)
-  return(list(
-    corr = data.corr,
-    plot = p
-  ))
-}
+# Source the model function.
+source(here::here("R/analysis/validation.R"))
 
 ## ---- exec-analysis ----
 
-# Prepare for the EDA.
-setup.analysis(dataset = "liver", cache = FALSE)
-liver <- liver %>% make.response()
-liver.shape <- liver %>% make.shape()
+liver.analysis <- function(..., log = TRUE) {
+  # If logging is on, setup the file.
+  if (log) {
+    output_file <- setup.log()
+    sink(file = output_file, append = TRUE, split = TRUE)
+  }
 
-# Describe the features.
-liver.features <- liver %>% summarize.features()
-print(liver.features)
+  # Start logging.
+  start.log()
 
-# Describe the response.
-liver.response <- liver %>% summarize.response()
-print(liver.response)
+  # Close the log file.
+  on.exit(sink(NULL))
 
-# Plot the features.
-output_file = "vignettes/out/HW3_corrplot.png"
-png(output_file)
-res <- liver %>% corr.features()
-print(res$corr)
-dev.off()
+  # Prepare for the EDA.
+  setup.analysis(target = "liver", cache = FALSE)
+  liver <- liver %>% make.response()
+  liver_shape <- liver %>% make.shape()
+  str(liver)
+  print(liver_shape)
 
+  # Describe the features.
+  liver_features <- liver %>% summarize.features()
+  print(liver_features)
+
+  # Describe the response.
+  liver_response <- liver %>% summarize.response()
+  print(liver_response)
+
+  # Plot the features.
+  # liver_corr <- liver %>% corr.features()
+  liver_corrplot <- liver %>%
+    corr.plot("HW3_corrplot.png",
+              device = png,
+              device_opts = list(
+                units = "in",
+                width = 8,
+                height = 8,
+                res = 300
+              ),
+              sig.level = 0.05,
+              insig = "blank",
+              title = "Correlation Plot",
+              mar = c(1,1,2,1))
+  print(liver_corrplot$corr)
+
+  ## ---- exec-classifier ----
+
+  # Fit a logistic regression model.
+  liver_fit <- liver %>%
+    fit.model(algorithm = glm, formula = severity ~ ., family = "binomial")
+  print(liver_fit)
+
+  # Get the summary.
+  liver_summary <- liver_fit %>% summarize.model()
+  print(liver_summary)
+
+  # Calculate classification table.
+  # print(liver$severity)
+  p <- liver %>% calc.probability(severity == "Severe")
+  predictions <- liver_fit %>% calc.predictions(threshold = p, type = "response")
+  truth <- (liver$severity == "Severe")
+  liver_table <- make.confusion.mat(predictions, truth, true = "Severe", false = "Not Severe")
+  print(liver_table)
+
+  # Calculate the error rate.
+  liver_error <- calc.error.rate(liver_table)
+  print(liver_error)
+
+  # Find the optimal error rates.
+  liver_optimal_errors <- calc.optimal.error.rates(liver_fit$fitted.values, truth)
+  str(liver_optimal_errors)
+
+  # Plot the optimal error rates.
+  liver_optimal_plot <- plot.optimal.error.rates(
+    liver_optimal_errors$errors,
+    liver_optimal_errors$thresholds
+  )
+  print(liver_optimal_plot)
+  # Show the plot.
+
+  # Find the optimal error table.
+  liver_optimal_table <- make.optimal.confusion.mat(liver_fit$fitted.values, truth, true = "Severe", false = "Not Severe")
+  print(liver_optimal_table)
+
+  # Find the cross validation rates.
+  liver_cv_errors <- calc.cv.error.rates(liver, truth, glm, formula = severity ~ ., k = 10, m = 100, rounds = 100)
+  print(liver_cv_errors)
+
+  # End logging.
+  end.log()
+}
+
+# Run analysis.
+liver.analysis()

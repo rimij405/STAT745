@@ -1,11 +1,10 @@
-doParallel
+corrplot
 dplyr
 forcats
 foreach
 ggplot2
 here
 magrittr
-parallel
 readr
 renv
 rmarkdown
