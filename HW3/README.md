@@ -7,6 +7,8 @@ instructor: "Professor Qi Yu"
 
 ## Package Details
 
+<!-- HW3 -->
+
 This package contains 2 datasets:
 
 * `liver_data`: Liver malfunction data on 345 men from an undisclosed experiement. (Source: From course instructor).

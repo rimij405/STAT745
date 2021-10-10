@@ -1,0 +1,45 @@
+---
+# Document metadata information:
+title: "Homework 3 Report"
+subtitle: Classification of liver malfunction severity (LDA)
+author: Ian Effendi \\ iae2784@rit.edu
+date: October 9, 2021
+# Output formats:
+output:
+  # Output as a previewable HTML Notebook.
+  html_notebook:
+    theme: united
+    highlight: tango
+    df_print: paged
+    toc: true
+    toc_depth: 2
+  # Output as an rmarkdown::pdf_document()
+  pdf_document:
+    keep_tex: true
+    highlight: tango
+    fig_caption: true
+    df_print: kable
+    toc: true
+    toc_depth: 3
+# Package vignette options:
+vignette: >
+  %\VignetteIndexEntry{Homework 2 Report}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+# pandoc -> pdfLaTeX rendering options:
+fontsize: 11pt
+geometry:
+  - margin=1in
+  - heightrounded
+documentclass: scrartcl
+papersize: a4
+urlcolor: violet
+toccolor: blue
+# Custom knit function.
+knit: (function(inputFile, encoding){
+  rmarkdown::render(inputFile, encoding = encoding, 
+  output_dir = "vignettes/out", 
+  output_format="all") })
+---
+
+Example report.

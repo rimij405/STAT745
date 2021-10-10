@@ -5,7 +5,7 @@
 ## ---- install-deps ----
 
 # Install dependencies.
-if(renv::status()$synchronized == FALSE){
+if (renv::status()$synchronized == FALSE) {
   print("Installing dependencies...")
   renv::restore()
 }
@@ -14,4 +14,5 @@ if(renv::status()$synchronized == FALSE){
 
 # Add packages to namespace.
 library(magrittr)
+library(foreach)
 library(ggplot2)
