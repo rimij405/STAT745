@@ -117,4 +117,7 @@ import.liver <- function(path = liver.filepaths()$rds) {
 ## ---- display-liver-data ----
 
 # tbl is easier to work with than data.frame
-liver_df <- import.liver()
+get.liver <- function(name = "liver_df", ...) {
+  assign(name, import.liver(...))
+  return(get(name))
+}
