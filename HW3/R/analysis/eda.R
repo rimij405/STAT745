@@ -2,14 +2,15 @@
 #
 # Handle EDA of the liver dataset.
 
+## ---- def-analysis-eda ----
+
 #' Recode the response factors.
 #'
 #' @param .data Dataset.
 #'
 #' @return Modified dataset.
 make.response <- function(.data) {
-  printf("Recoding the response in the dataset.")
-  print(.data$severity)
+  # print(.data$severity)
   df <- .data %>%
     dplyr::mutate(
       severity = forcats::fct_recode(severity, "Not Severe" = "2", "Severe" = "1")
@@ -18,8 +19,8 @@ make.response <- function(.data) {
     dplyr::mutate(
       severity = forcats::fct_relevel(severity, "Not Severe", "Severe")
     )
-  print(df$severity)
-  print(df %>% dplyr::count(severity))
+  # print(df$severity)
+  # print(df %>% dplyr::count(severity))
   return(df)
 }
 
@@ -41,13 +42,11 @@ make.shape <- function(.data) {
 
 
 summarize.features <- function(.data, ..., d = ncol(.data)) {
-  print("Summarizing dataset features.")
   s <- summary(.data[,-d])
   return(s)
 }
 
 summarize.response <- function(.data, ..., d = ncol(.data)) {
-  print("Summarizing dataset response.")
   s <- summary(.data[,d])
   return(s)
 }

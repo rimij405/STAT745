@@ -5,6 +5,8 @@
 # Source the build functions.
 source(here::here("R/build.R"))
 
+## ---- def-analysis-setup ----
+
 #' Setup the analysis.
 #'
 #' @param target Named object to create that will contain data.

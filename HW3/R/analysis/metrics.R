@@ -2,6 +2,8 @@
 #
 # Functions related to metrics.
 
+## ---- def-analysis-metrics ----
+
 #' Calculate the probability of the provided condition.
 #'
 #' @param .data Dataset to calculate class probabilities.
@@ -140,7 +142,7 @@ plot.optimal.error.rates <- function(errors, thresholds, ..., limit = 1.0, digit
   # Bind thresholds.
   .data <- dplyr::as_tibble(cbind(errs, threshs))
   names(.data) <- c("false.neg", "false.pos", "total.err", "thresholds")
-  str(.data)
+  # str(.data)
 
   # Pivot the data for plotting.
   data <- .data %>%
@@ -150,7 +152,7 @@ plot.optimal.error.rates <- function(errors, thresholds, ..., limit = 1.0, digit
       values_to = "error"
     )
   data$linetype <- (data$error_type == "total.err")
-  str(data)
+  # str(data)
 
   # Get the graph title.
   p_title <- sprintf("Optimum error rate is %s at threshold = %s", rounded_error, rounded_threshold)

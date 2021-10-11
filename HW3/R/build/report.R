@@ -5,7 +5,9 @@
 
 # Import the utilities.
 source(here::here("R/utils.R"))
+source.utils()
 
+## ---- def-build-report ----
 
 # Render the report with knitr, rmarkdown
 # into the output folder.

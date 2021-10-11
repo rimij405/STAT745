@@ -8,6 +8,8 @@ source(here::here("R/analysis/model.R"))
 # Source the model function.
 source(here::here("R/analysis/metrics.R"))
 
+## ---- def-analysis-validation ----
+
 #' Make sequence (n = `length`) of equidistant threshold values between `from` and `to`.
 #'
 #' @param from Minimum threshold value.
@@ -32,10 +34,17 @@ make.thresholds <- function(from = 0, to = 1, length = 100) {
 #' @param thresholds Optional sequence of thresholds to pass. Useful if repeated thresholds.
 #'
 #' @return Error rate.
-calc.cv.error.rates <- function(.data, truth, algorithm,
-                                ...,  formula = Y ~ .,
+calc.cv.error.rates <- function(.data, truth,
+                                algorithm = glm,
+                                params = list(
+                                  formula = Y ~ .,
+                                  family = "binomial"
+                                ),
                                 k = 10, rounds = 10, m = 10,
                                 thresholds = seq(from = 0, to = 1, length = m)) {
+
+  printf("%s", deparse1(sys.call()))
+  printf("%s", ls())
 
   # Get the sample count.
   n_samples <- nrow(.data)
@@ -44,7 +53,6 @@ calc.cv.error.rates <- function(.data, truth, algorithm,
   printf("Performing %s-fold CV:", k)
   printf("# Samples: %s", n_samples)
   printf("# Thresholds: %s", m)
-  # str(thresholds)
   printf("# k folds: %s || # rounds: %s", k, rounds)
   print("---------------------------")
 
@@ -89,8 +97,7 @@ calc.cv.error.rates <- function(.data, truth, algorithm,
       .obj <- fit.model(
         .data = fold_train,
         algorithm = algorithm,
-        formula = formula,
-        ... # eg. family = "binomial"
+        params = params
       )$obj
 
       # Calculate predictions.
@@ -248,8 +255,12 @@ plot.cv.error.rates <- function(errors, thresholds, ..., from = 0, to = 1, digit
 #' @param threshold Threshold to use for the table.
 #'
 #' @return Error rate.
-make.cv.confusion.mat <- function(.data, truth, algorithm,
-                                  ...,  formula = Y ~ .,
+make.cv.confusion.mat <- function(.data, truth,
+                                  algorithm = glm,
+                                  params = list(
+                                    formula = Y ~ .,
+                                    family = "binomial"
+                                  ),
                                   k = 10, rounds = 10,
                                   threshold = 0.5) {
 
@@ -290,8 +301,7 @@ make.cv.confusion.mat <- function(.data, truth, algorithm,
       .obj <- fit.model(
         .data = fold_train,
         algorithm = algorithm,
-        formula = formula,
-        ... # eg. family = "binomial"
+        params = params
       )$obj
 
       # Calculate predictions.

@@ -3,18 +3,26 @@
 # Adds necessary packages to the source.
 
 # Source the utility functions.
-source(here::here("R/utils.R"))
+# source(here::here("R/utils.R"))
+# source.utils()
 
-## ---- install-deps ----
+## ---- def-packages ----
 
-write.deps()
-install.deps()
+#' Require these packages to be on the system.
+require.deps <- function() {
+  require(knitr)
+  require(rmarkdown)
+  require(markdown)
+  require(mime)
+}
 
-## ---- attach-deps ----
+#' Require and attach these packages to the project namespace.
+attach.deps <- function() {
+  library(magrittr)
+  library(foreach)
+  library(ggplot2)
+  library(forcats)
+  library(tidyr)
+  library(dplyr)
 
-# Add packages to namespace.
-library(magrittr)
-library(foreach)
-library(ggplot2)
-library(forcats)
-library(dplyr)
+}

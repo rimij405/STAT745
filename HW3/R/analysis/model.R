@@ -2,6 +2,8 @@
 #
 # Model related functions.
 
+## ---- def-analysis-model ----
+
 #' Fit a model.
 #'
 #' @param .data Dataset.
@@ -10,18 +12,29 @@
 #' @param ... Additional model parameters.
 #'
 #' @return Fit model object.
-fit.model <- function(.data, algorithm, formula = Y ~ ., ...) {
-
-  # print("Fitting model on the dataset...")
-  model_opts <- list(formula = formula, data = .data, ...)
-  model_obj <- do.call(algorithm, args = model_opts)
-  # Equivalent: model_obj <- rlang::exec(quote(algorithm), !!!model_opts)
+fit.model <- function(.data,
+                      algorithm = glm,
+                      params = list(
+                        formula = Y ~ .,
+                        family = "binomial"
+                      ), ...) {
 
   # Get summary and replace the expanded $call.
   model_expr <- sprintf("%s", deparse1(sys.call()))
   model_expr <- gsub("\"", "'", model_expr)
   model_expr <- gsub("", "", model_expr)
   # print(model_expr)
+
+  # Prepare algorithm arguments.
+  # - data is always ovewritten to .data
+  # - params is of least priority.
+  # - ... parameters overwrite anything in params.
+  model_args <- list( ) # Empty list to begin.
+  model_args <- modifyList(model_args, params, keep.null = TRUE) # Allows us to mark params as NULL.
+  model_args <- modifyList(model_args, list(...), keep.null = TRUE) # Allows us to mark params as NULL.
+  model_args <- modifyList(model_args, list(data = .data)) # Ensures our data param is .data always.
+  model_obj <- do.call(algorithm, args = model_args)
+
   # model_obj$call <- model_expr
   return(list(
     obj = model_obj,

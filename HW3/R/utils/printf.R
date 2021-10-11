@@ -22,3 +22,15 @@ printf.class <- function(obj, ..., collapse = "/") {
   print(fmtted)
   return(fmtted)
 }
+
+#' Print message between two borders.
+print.section <- function(..., border = "=========================", sep = "\n") {
+  writeLines(border, sep = sep)
+  writeLines(..., sep = sep)
+  writeLines(border, sep = sep)
+}
+
+messagef <- function(template, ...) {
+  fmtted <- sprintf(template, ...)
+  message(fmtted)
+}

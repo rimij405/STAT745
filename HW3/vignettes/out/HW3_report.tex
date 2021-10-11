@@ -49,6 +49,46 @@
   pdfcreator={LaTeX via pandoc}}
 \urlstyle{same} % disable monospaced font for URLs
 \usepackage[margin=1in,heightrounded]{geometry}
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{248,248,248}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{#1}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.77,0.63,0.00}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\BuiltInTok}[1]{#1}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{#1}}}
+\newcommand{\ExtensionTok}[1]{#1}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ImportTok}[1]{#1}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{#1}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\RegionMarkerTok}[1]{#1}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
 \usepackage{graphicx}
 \makeatletter
 \def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
@@ -80,7 +120,7 @@
 \subtitle{Classification of liver malfunction severity (LDA)}
 \author{Ian Effendi \textbackslash{}
 \href{mailto:iae2784@rit.edu}{\nolinkurl{iae2784@rit.edu}}}
-\date{October 9, 2021}
+\date{October 11, 2021}
 
 \begin{document}
 \maketitle
@@ -90,6 +130,280 @@
 \setcounter{tocdepth}{3}
 \tableofcontents
 }
-Example report.
+\hypertarget{certification}{%
+\subsection{Certification}\label{certification}}
+
+\begin{quote}
+I certify that I indeed finished reading Ch. 4 from \emph{An
+Introduction to Statistical Learning}, by James Gareth, Daniela Witten,
+Trevor Hastie, Robert Tibshirani.
+\end{quote}
+
+\hypertarget{overview}{%
+\subsection{Overview}\label{overview}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Comments that begin with \textquotesingle{}\#\# {-}{-}{-}{-}\textquotesingle{} can be used}
+\CommentTok{\# to separate content. R Studio provides them as }
+\CommentTok{\# little bookmarks that you can use.}
+
+\DocumentationTok{\#\# {-}{-}{-}{-} Hidden Variables {-}{-}{-}{-}}
+\NormalTok{.VERBOSE }\OtherTok{=} \ConstantTok{TRUE}
+\NormalTok{.FILEPATHS }\OtherTok{=} \FunctionTok{list}\NormalTok{(}
+  \AttributeTok{utils      =} \FunctionTok{list}\NormalTok{(}
+      \AttributeTok{.            =} \StringTok{"R/utils.R"}\NormalTok{,}
+      \AttributeTok{dependencies =} \StringTok{"R/utils/dependencies.R"}\NormalTok{,}
+      \AttributeTok{paths        =} \StringTok{"R/utils/paths.R"}\NormalTok{,}
+      \AttributeTok{printf       =} \StringTok{"R/utils/printf.R"}
+\NormalTok{  ),}
+  \AttributeTok{packages   =} \StringTok{"R/packages.R"}\NormalTok{,}
+  \AttributeTok{build      =} \FunctionTok{list}\NormalTok{(}
+      \AttributeTok{.            =} \StringTok{"R/build.R"}\NormalTok{,}
+      \AttributeTok{dataset      =} \StringTok{"R/build/dataset.R"}\NormalTok{,}
+      \AttributeTok{report       =} \StringTok{"R/build/report.R"}
+\NormalTok{  ),}
+  \AttributeTok{analysis   =} \FunctionTok{list}\NormalTok{(}
+      \AttributeTok{.            =} \StringTok{"R/analysis.R"}\NormalTok{,}
+      \AttributeTok{setup        =} \StringTok{"R/analysis/setup.R"}\NormalTok{,}
+      \AttributeTok{eda          =} \StringTok{"R/analysis/eda.R"}\NormalTok{,}
+      \AttributeTok{model        =} \StringTok{"R/analysis/model.R"}\NormalTok{,}
+      \AttributeTok{metrics      =} \StringTok{"R/analysis/metrics.R"}\NormalTok{,}
+      \AttributeTok{validation   =} \StringTok{"R/analysis/validation.R"}
+\NormalTok{  )}
+\NormalTok{)}
+
+\DocumentationTok{\#\# {-}{-}{-}{-} Default Settings (Knit) {-}{-}{-}{-}}
+\NormalTok{knitr}\SpecialCharTok{::}\NormalTok{opts\_knit}\SpecialCharTok{$}\FunctionTok{set}\NormalTok{( }
+  \AttributeTok{root.dir =}\NormalTok{ here}\SpecialCharTok{::}\FunctionTok{here}\NormalTok{()}
+\NormalTok{)}
+
+\DocumentationTok{\#\# {-}{-}{-}{-} Default Settings (Chunk) {-}{-}{-}{-}}
+\NormalTok{knitr}\SpecialCharTok{::}\NormalTok{opts\_chunk}\SpecialCharTok{$}\FunctionTok{set}\NormalTok{(}
+  
+  \DocumentationTok{\#\# {-}{-}{-}{-} Options (Execution) {-}{-}{-}{-}}
+  \AttributeTok{eval        =} \ConstantTok{TRUE}\NormalTok{,   }\CommentTok{\# By default, turn off chunk evaluation.}
+  \AttributeTok{cache       =} \ConstantTok{FALSE}\NormalTok{,  }\CommentTok{\# By default, cache all chunk results.}
+  \AttributeTok{error       =} \ConstantTok{FALSE}\NormalTok{,   }\CommentTok{\# Stop R when an error is raised.}
+  
+  \DocumentationTok{\#\# {-}{-}{-}{-} Options (Figure) {-}{-}{-}{-}}
+  \AttributeTok{fig.path    =} \StringTok{\textquotesingle{}figure/\textquotesingle{}}\NormalTok{,}
+  \AttributeTok{fig.keep    =} \StringTok{\textquotesingle{}all\textquotesingle{}}\NormalTok{,}
+  \AttributeTok{fig.align   =} \StringTok{\textquotesingle{}center\textquotesingle{}}\NormalTok{,}
+  \AttributeTok{fig.width   =} \DecValTok{8}\NormalTok{,}
+  \AttributeTok{fig.height  =} \DecValTok{6}\NormalTok{,}
+  \AttributeTok{dpi         =} \DecValTok{600}\NormalTok{,}
+  
+  \DocumentationTok{\#\# {-}{-}{-}{-} Options (Formatting) {-}{-}{-}{-}}
+  \AttributeTok{results     =} \StringTok{\textquotesingle{}hold\textquotesingle{}}\NormalTok{,}
+  \AttributeTok{collapse    =} \ConstantTok{FALSE}\NormalTok{,}
+  \AttributeTok{strip.white =} \ConstantTok{FALSE}\NormalTok{,  }\CommentTok{\# Remove blank lines at beginning and end of the source code block output.}
+  \AttributeTok{tidy        =} \ConstantTok{FALSE}\NormalTok{,}
+  \AttributeTok{size        =} \StringTok{\textquotesingle{}tiny\textquotesingle{}}\NormalTok{,}
+  \AttributeTok{R.options   =} \FunctionTok{list}\NormalTok{(}\AttributeTok{width =} \DecValTok{60}\NormalTok{),}
+
+  \DocumentationTok{\#\# {-}{-}{-}{-} Options (Display) {-}{-}{-}{-}}
+  \AttributeTok{include     =} \ConstantTok{TRUE}\NormalTok{,}
+  \AttributeTok{echo        =} \ConstantTok{TRUE}\NormalTok{,   }
+  \AttributeTok{message     =} \ConstantTok{TRUE}\NormalTok{,}
+  \AttributeTok{warning     =} \ConstantTok{TRUE}
+\NormalTok{)}
+
+\DocumentationTok{\#\# {-}{-}{-}{-} Utility Functions {-}{-}{-}{-}}
+
+\CommentTok{\#\textquotesingle{} Use relative path to import all}
+\CommentTok{\#\textquotesingle{} chunks from an external script,}
+\CommentTok{\#\textquotesingle{} without executing the code inside}
+\CommentTok{\#\textquotesingle{} of the document.}
+\CommentTok{\#\textquotesingle{}}
+\CommentTok{\#\textquotesingle{} @param path Relative path to file.}
+\CommentTok{\#\textquotesingle{} @param ... Additional parameters passed to the \textasciigrave{}read\_chunk\textasciigrave{} call.}
+\CommentTok{\#\textquotesingle{} @param roxygen\_comments FALSE; should comments be stripped out from external code?}
+\CommentTok{\#\textquotesingle{} @param verbose Print messages to stderr.}
+\NormalTok{import.chunks }\OtherTok{\textless{}{-}} \ControlFlowTok{function}\NormalTok{(path, ..., }\AttributeTok{verbose =}\NormalTok{ .VERBOSE) \{}
+  \ControlFlowTok{if}\NormalTok{ (verbose) \{ }\FunctionTok{message}\NormalTok{(}\FunctionTok{sprintf}\NormalTok{(}\StringTok{"Importing chunks from external script: \textquotesingle{}\%s\textquotesingle{}..."}\NormalTok{, }\FunctionTok{basename}\NormalTok{(path))) \}}
+\NormalTok{  file }\OtherTok{=}\NormalTok{ here}\SpecialCharTok{::}\FunctionTok{here}\NormalTok{(path)}
+\NormalTok{  knitr}\SpecialCharTok{::}\FunctionTok{read\_chunk}\NormalTok{(file, ...)}
+\NormalTok{\}}
+
+\CommentTok{\#\textquotesingle{} Use relative path to source an}
+\CommentTok{\#\textquotesingle{} external script in its entirety.}
+\CommentTok{\#\textquotesingle{}}
+\CommentTok{\#\textquotesingle{} @param path Relative path to file.}
+\CommentTok{\#\textquotesingle{} @param ... Additional parameters passed to the \textasciigrave{}source\textasciigrave{} call.}
+\CommentTok{\#\textquotesingle{} @param verbose Print messages to stderr.}
+\NormalTok{import.source }\OtherTok{\textless{}{-}} \ControlFlowTok{function}\NormalTok{(path, ..., }\AttributeTok{verbose =}\NormalTok{ .VERBOSE) \{}
+  \ControlFlowTok{if}\NormalTok{ (verbose) \{ }\FunctionTok{message}\NormalTok{(}\FunctionTok{sprintf}\NormalTok{(}\StringTok{"Sourcing external script: \textquotesingle{}\%s\textquotesingle{}..."}\NormalTok{, }\FunctionTok{basename}\NormalTok{(path))) \}}
+  \FunctionTok{source}\NormalTok{(here}\SpecialCharTok{::}\FunctionTok{here}\NormalTok{(path), ..., }\AttributeTok{echo =}\NormalTok{ .VERBOSE)}
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+
+\DocumentationTok{\#\# {-}{-}{-}{-} Import (R/utils.R) {-}{-}{-}{-}}
+\FunctionTok{import.chunks}\NormalTok{(.FILEPATHS}\SpecialCharTok{$}\NormalTok{utils}\SpecialCharTok{$}\NormalTok{.)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Importing chunks from external script: 'utils.R'...
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+
+\DocumentationTok{\#\# {-}{-}{-}{-} Import (R/packages.R) {-}{-}{-}{-}}
+\FunctionTok{import.chunks}\NormalTok{(.FILEPATHS}\SpecialCharTok{$}\NormalTok{packages)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Importing chunks from external script: 'packages.R'...
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+
+\DocumentationTok{\#\# {-}{-}{-}{-} Import (R/build/*) {-}{-}{-}{-}}
+\FunctionTok{import.chunks}\NormalTok{(.FILEPATHS}\SpecialCharTok{$}\NormalTok{build}\SpecialCharTok{$}\NormalTok{dataset)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Importing chunks from external script: 'dataset.R'...
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{import.chunks}\NormalTok{(.FILEPATHS}\SpecialCharTok{$}\NormalTok{build}\SpecialCharTok{$}\NormalTok{report)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Importing chunks from external script: 'report.R'...
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+
+\DocumentationTok{\#\# {-}{-}{-}{-} Import (R/analysis/*) {-}{-}{-}{-}}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+
+\DocumentationTok{\#\# {-}{-}{-}{-} Source (R/utils.R) {-}{-}{-}{-}}
+\FunctionTok{source.utils}\NormalTok{(}\AttributeTok{local =} \ConstantTok{FALSE}\NormalTok{, }\AttributeTok{force =} \ConstantTok{TRUE}\NormalTok{, }\AttributeTok{verbose =}\NormalTok{ .VERBOSE)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Loading 3 utilit(y/ies)...
+\end{verbatim}
+
+\begin{verbatim}
+## Loading utility: 'printf'
+\end{verbatim}
+
+\begin{verbatim}
+## Loading utility: 'paths'
+\end{verbatim}
+
+\begin{verbatim}
+## Loading utility: 'dependencies'
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+
+\DocumentationTok{\#\# {-}{-}{-}{-} Source (R/packages.R) {-}{-}{-}{-}}
+\FunctionTok{install.deps}\NormalTok{(}\AttributeTok{file =} \StringTok{"requirements.txt"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## * The project is already synchronized with the lockfile.
+\end{verbatim}
+
+In this assignment we will:
+
+\begin{itemize}
+\tightlist
+\item
+  Perform exploratory data analysis (\emph{EDA}) on the dataset.
+\item
+  Fit and analyze a linear discriminant analysis (\emph{LDA}) model on
+  the dataset.
+\item
+  Perform multiple cross-validation tasks at different \(k\)-fold values
+  (\(k=3,\,k=10\)).
+\end{itemize}
+
+\hypertarget{elt}{%
+\subsection{ELT}\label{elt}}
+
+Much of the \emph{extract}, \emph{load}, and \emph{transform}
+(\emph{ELT}) process from the previous report has been revised for this
+assignment. Notably, a \texttt{make.dataset()} function streamlines the
+process of parsing the source \texttt{Liver.txt} file into a compatible
+\texttt{data.frame}.
+
+\newpage
+
+\hypertarget{session-information}{%
+\subsection{Session Information}\label{session-information}}
+
+\emph{This document was generated from an
+\href{http://rmarkdown.rstudio.com}{R Markdown} Notebook (See the
+\texttt{vignettes/HW3\_report.Rmd} in the project's sub-directory). The
+setup chunk for this document sets the root directory to the project
+root directory using the \texttt{here} package; all file paths are
+relative to the project root.}
+
+\begin{verbatim}
+## R version 4.1.1 (2021-08-10)
+## Platform: x86_64-w64-mingw32/x64 (64-bit)
+## Running under: Windows 10 x64 (build 19042)
+## 
+## Matrix products: default
+## 
+## locale:
+## [1] LC_COLLATE=English_United States.1252 
+## [2] LC_CTYPE=English_United States.1252   
+## [3] LC_MONETARY=English_United States.1252
+## [4] LC_NUMERIC=C                          
+## [5] LC_TIME=English_United States.1252    
+## 
+## attached base packages:
+## [1] stats     graphics  grDevices datasets  utils    
+## [6] methods   base     
+## 
+## other attached packages:
+##  [1] dplyr_1.0.7    tidyr_1.1.4    forcats_0.5.1 
+##  [4] ggplot2_3.3.5  foreach_1.5.1  magrittr_2.0.1
+##  [7] mime_0.12      markdown_1.1   rmarkdown_2.11
+## [10] knitr_1.36    
+## 
+## loaded via a namespace (and not attached):
+##  [1] compiler_4.1.1   pillar_1.6.3     jquerylib_0.1.4 
+##  [4] iterators_1.0.13 tools_4.1.1      bit_4.0.4       
+##  [7] digest_0.6.28    corrplot_0.90    jsonlite_1.7.2  
+## [10] evaluate_0.14    lifecycle_1.0.1  tibble_3.1.5    
+## [13] gtable_0.3.0     pkgconfig_2.0.3  rlang_0.4.11    
+## [16] parallel_4.1.1   yaml_2.2.1       xfun_0.26       
+## [19] fastmap_1.1.0    withr_2.4.2      stringr_1.4.0   
+## [22] hms_1.1.1        generics_0.1.0   vctrs_0.3.8     
+## [25] bit64_4.0.5      tidyselect_1.1.1 rprojroot_2.0.2 
+## [28] grid_4.1.1       glue_1.4.2       here_1.0.1      
+## [31] R6_2.5.1         fansi_0.5.0      vroom_1.5.5     
+## [34] tzdb_0.1.2       readr_2.0.2      purrr_0.3.4     
+## [37] scales_1.1.1     codetools_0.2-18 htmltools_0.5.2 
+## [40] ellipsis_0.3.2   colorspace_2.0-2 renv_0.14.0     
+## [43] utf8_1.2.2       stringi_1.7.5    munsell_0.5.0   
+## [46] crayon_1.4.1
+\end{verbatim}
 
 \end{document}

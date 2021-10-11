@@ -5,6 +5,9 @@
 
 # Import the utilities.
 source(here::here("R/utils.R"))
+source.utils()
+
+## ---- def-build-dataset ----
 
 #' Make the dataset.
 #'
@@ -19,13 +22,13 @@ make.dataset <- function(target = "Liver.rds", ..., cache = TRUE, clean = FALSE)
     # `data-raw/liver.R` script.
     if (clean) { clean.dataset(target = target, dry = FALSE) }
     source(here::here("data-raw/liver.R"))
-    printf("Loading '%s'...", target)
+    messagef("Loading '%s'...", target)
   } else {
-    printf("'%s' exists.", target)
+    messagef("'%s' exists.", target)
   }
   assign(target, get.liver(name = target), envir = .GlobalEnv)
   target_df <- get(target)
-  printf("Registered target dataset to global environment. Access using '%s'.", target)
+  messagef("Registered target dataset to global environment. Access using '%s'.", target)
   return(target_df)
 }
 
@@ -37,11 +40,11 @@ clean.dataset <- function(target = "Liver.rds", ..., dry = FALSE) {
 
   # Generic remove function that skips the inner function when dry.
   remove.x <- function(x, FUN = rm, ..., dry = FALSE) {
-    if (is.na(x) || x == '') { print("Nothing to remove.") }
+    if (is.na(x) || x == '') { message("Nothing to remove.") }
     if (!dry) {
       do.call(FUN, list(x))
     } else {
-      print("Skipping removal during DRY run...")
+      message("Skipping removal during DRY run...")
     }
   }
 
@@ -49,16 +52,16 @@ clean.dataset <- function(target = "Liver.rds", ..., dry = FALSE) {
   remove.file <- function(file) {
     path <- here::here(file)
     if (!is.na(path) && path != '' && file.exists(path)) {
-      printf("Found %s (%s). Removing dataset file...", basename(file), path)
+      messagef("Found %s (%s). Removing dataset file...", basename(file), path)
       unlink(path)
     } else {
-      printf("No file '%s' exists at the specified location (%s).", basename(file), path)
+      messagef("No file '%s' exists at the specified location (%s).", basename(file), path)
     }
   }
 
   # Clean files specified by vector of relative file names.
   clean.files <- function(files, ..., dry = FALSE) {
-    if (is.na(files) || length(files) == 0) { print("No files to remove.") }
+    if (is.na(files) || length(files) == 0) { message("No files to remove.") }
     for (i in 1:length(files)) {
       remove.x(files[i], remove.file, dry = dry)
     }
@@ -67,16 +70,16 @@ clean.dataset <- function(target = "Liver.rds", ..., dry = FALSE) {
   # Remove a single named object.
   remove.var <- function(x) {
     if (exists(x)) {
-      printf("Removing '%s'...", x)
+      messagef("Removing '%s'...", x)
       rm(list = x, envir = .GlobalEnv)
     } else {
-      printf("No object '%s' in the global environment.", x)
+      messagef("No object '%s' in the global environment.", x)
     }
   }
 
   # Clean named objects in vector.
   clean.vars <- function(vars, ..., dry = FALSE) {
-    if (is.na(vars) || length(vars) == 0) { print("No variables to remove.") }
+    if (is.na(vars) || length(vars) == 0) { message("No variables to remove.") }
     for (i in 1:length(vars)) {
       remove.x(vars[i], remove.var, dry = dry)
     }
@@ -105,5 +108,5 @@ clean.dataset <- function(target = "Liver.rds", ..., dry = FALSE) {
   clean.vars(vars = .VARS, dry = dry)
 
   # Clean complete.
-  print("Clean completed. Run `make.dataset()` to rebuild dataset.")
+  message("Clean completed. Run `make.dataset()` to rebuild dataset.")
 }

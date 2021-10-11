@@ -11,7 +11,7 @@
 
 <meta name="author" content="Ian Effendi \ iae2784@rit.edu" />
 
-<meta name="date" content="2021-10-09" />
+<meta name="date" content="2021-10-11" />
 
 <title>Homework 3 Report</title>
 
@@ -47,6 +47,109 @@
     </style>
 
 
+<style type="text/css">
+  code {
+    white-space: pre;
+  }
+  .sourceCode {
+    overflow: visible;
+  }
+</style>
+<style type="text/css" data-origin="pandoc">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {  background-color: #f8f8f8; }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ef2929; } /* Alert */
+code span.an { color: #8f5902; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #c4a000; } /* Attribute */
+code span.bn { color: #0000cf; } /* BaseN */
+code span.cf { color: #204a87; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4e9a06; } /* Char */
+code span.cn { color: #000000; } /* Constant */
+code span.co { color: #8f5902; font-style: italic; } /* Comment */
+code span.cv { color: #8f5902; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #8f5902; font-weight: bold; font-style: italic; } /* Documentation */
+code span.dt { color: #204a87; } /* DataType */
+code span.dv { color: #0000cf; } /* DecVal */
+code span.er { color: #a40000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #0000cf; } /* Float */
+code span.fu { color: #000000; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #8f5902; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #204a87; font-weight: bold; } /* Keyword */
+code span.op { color: #ce5c00; font-weight: bold; } /* Operator */
+code span.ot { color: #8f5902; } /* Other */
+code span.pp { color: #8f5902; font-style: italic; } /* Preprocessor */
+code span.sc { color: #000000; } /* SpecialChar */
+code span.ss { color: #4e9a06; } /* SpecialString */
+code span.st { color: #4e9a06; } /* String */
+code span.va { color: #000000; } /* Variable */
+code span.vs { color: #4e9a06; } /* VerbatimString */
+code span.wa { color: #8f5902; font-weight: bold; font-style: italic; } /* Warning */
+
+.sourceCode .row {
+  width: 100%;
+}
+.sourceCode {
+  overflow-x: auto;
+}
+.code-folding-btn {
+  margin-right: -30px;
+}
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    for (var j = 0; j < rules.length; j++) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") continue;
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') continue;
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
 
 
 <style type="text/css">
@@ -202,16 +305,258 @@ pre code {
 <h1 class="title toc-ignore">Homework 3 Report</h1>
 <h3 class="subtitle">Classification of liver malfunction severity (LDA)</h3>
 <h4 class="author">Ian Effendi \ <a href="mailto:iae2784@rit.edu" class="email">iae2784@rit.edu</a></h4>
-<h4 class="date">October 9, 2021</h4>
+<h4 class="date">October 11, 2021</h4>
 
 </div>
 
+<div id="TOC">
+<ul>
+<li><a href="#certification">Certification</a></li>
+<li><a href="#overview">Overview</a></li>
+<li><a href="#elt">ELT</a></li>
+<li><a href="#session-information">Session Information</a></li>
+</ul>
+</div>
 
 <!-- rnb-text-begin -->
-<p>Example report.</p>
+<div id="certification" class="section level2">
+<h2>Certification</h2>
+<blockquote>
+<p>I certify that I indeed finished reading Ch. 4 from <em>An Introduction to Statistical Learning</em>, by James Gareth, Daniela Witten, Trevor Hastie, Robert Tibshirani.</p>
+</blockquote>
+</div>
+<div id="overview" class="section level2">
+<h2>Overview</h2>
 <!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjpbIiMgQ29tbWVudHMgdGhhdCBiZWdpbiB3aXRoICcjIyAtLS0tJyBjYW4gYmUgdXNlZCIsIiMgdG8gc2VwYXJhdGUgY29udGVudC4gUiBTdHVkaW8gcHJvdmlkZXMgdGhlbSBhcyAiLCIjIGxpdHRsZSBib29rbWFya3MgdGhhdCB5b3UgY2FuIHVzZS4iLCIiLCIjIyAtLS0tIEhpZGRlbiBWYXJpYWJsZXMgLS0tLSIsIi5WRVJCT1NFID0gVFJVRSIsIi5GSUxFUEFUSFMgPSBsaXN0KFxuICB1dGlscyAgICAgID0gbGlzdChcbiAgICAgIC4gICAgICAgICAgICA9IFwiUi91dGlscy5SXCIsXG4gICAgICBkZXBlbmRlbmNpZXMgPSBcIlIvdXRpbHMvZGVwZW5kZW5jaWVzLlJcIixcbiAgICAgIHBhdGhzICAgICAgICA9IFwiUi91dGlscy9wYXRocy5SXCIsXG4gICAgICBwcmludGYgICAgICAgPSBcIlIvdXRpbHMvcHJpbnRmLlJcIlxuICApLFxuICBwYWNrYWdlcyAgID0gXCJSL3BhY2thZ2VzLlJcIixcbiAgYnVpbGQgICAgICA9IGxpc3QoXG4gICAgICAuICAgICAgICAgICAgPSBcIlIvYnVpbGQuUlwiLFxuICAgICAgZGF0YXNldCAgICAgID0gXCJSL2J1aWxkL2RhdGFzZXQuUlwiLFxuICAgICAgcmVwb3J0ICAgICAgID0gXCJSL2J1aWxkL3JlcG9ydC5SXCJcbiAgKSxcbiAgYW5hbHlzaXMgICA9IGxpc3QoXG4gICAgICAuICAgICAgICAgICAgPSBcIlIvYW5hbHlzaXMuUlwiLFxuICAgICAgc2V0dXAgICAgICAgID0gXCJSL2FuYWx5c2lzL3NldHVwLlJcIixcbiAgICAgIGVkYSAgICAgICAgICA9IFwiUi9hbmFseXNpcy9lZGEuUlwiLFxuICAgICAgbW9kZWwgICAgICAgID0gXCJSL2FuYWx5c2lzL21vZGVsLlJcIixcbiAgICAgIG1ldHJpY3MgICAgICA9IFwiUi9hbmFseXNpcy9tZXRyaWNzLlJcIixcbiAgICAgIHZhbGlkYXRpb24gICA9IFwiUi9hbmFseXNpcy92YWxpZGF0aW9uLlJcIlxuICApXG4pIiwiIiwiIyMgLS0tLSBEZWZhdWx0IFNldHRpbmdzIChLbml0KSAtLS0tIiwia25pdHI6Om9wdHNfa25pdCRzZXQoIFxuICByb290LmRpciA9IGhlcmU6OmhlcmUoKVxuKSIsIiIsIiMjIC0tLS0gRGVmYXVsdCBTZXR0aW5ncyAoQ2h1bmspIC0tLS0iLCJrbml0cjo6b3B0c19jaHVuayRzZXQoXG4gIFxuICAjIyAtLS0tIE9wdGlvbnMgKEV4ZWN1dGlvbikgLS0tLVxuICBldmFsICAgICAgICA9IFRSVUUsICAgIyBCeSBkZWZhdWx0LCB0dXJuIG9mZiBjaHVuayBldmFsdWF0aW9uLlxuICBjYWNoZSAgICAgICA9IEZBTFNFLCAgIyBCeSBkZWZhdWx0LCBjYWNoZSBhbGwgY2h1bmsgcmVzdWx0cy5cbiAgZXJyb3IgICAgICAgPSBGQUxTRSwgICAjIFN0b3AgUiB3aGVuIGFuIGVycm9yIGlzIHJhaXNlZC5cbiAgXG4gICMjIC0tLS0gT3B0aW9ucyAoRmlndXJlKSAtLS0tXG4gIGZpZy5wYXRoICAgID0gJ2ZpZ3VyZS8nLFxuICBmaWcua2VlcCAgICA9ICdhbGwnLFxuICBmaWcuYWxpZ24gICA9ICdjZW50ZXInLFxuICBmaWcud2lkdGggICA9IDgsXG4gIGZpZy5oZWlnaHQgID0gNixcbiAgZHBpICAgICAgICAgPSA2MDAsXG4gIFxuICAjIyAtLS0tIE9wdGlvbnMgKEZvcm1hdHRpbmcpIC0tLS1cbiAgcmVzdWx0cyAgICAgPSAnaG9sZCcsXG4gIGNvbGxhcHNlICAgID0gRkFMU0UsXG4gIHN0cmlwLndoaXRlID0gRkFMU0UsICAjIFJlbW92ZSBibGFuayBsaW5lcyBhdCBiZWdpbm5pbmcgYW5kIGVuZCBvZiB0aGUgc291cmNlIGNvZGUgYmxvY2sgb3V0cHV0LlxuICB0aWR5ICAgICAgICA9IEZBTFNFLFxuICBzaXplICAgICAgICA9ICd0aW55JyxcbiAgUi5vcHRpb25zICAgPSBsaXN0KHdpZHRoID0gNjApLFxuXG4gICMjIC0tLS0gT3B0aW9ucyAoRGlzcGxheSkgLS0tLVxuICBpbmNsdWRlICAgICA9IFRSVUUsXG4gIGVjaG8gICAgICAgID0gVFJVRSwgICBcbiAgbWVzc2FnZSAgICAgPSBUUlVFLFxuICB3YXJuaW5nICAgICA9IFRSVUVcbikiLCIiLCIjIyAtLS0tIFV0aWxpdHkgRnVuY3Rpb25zIC0tLS0iLCIiLCIjJyBVc2UgcmVsYXRpdmUgcGF0aCB0byBpbXBvcnQgYWxsIiwiIycgY2h1bmtzIGZyb20gYW4gZXh0ZXJuYWwgc2NyaXB0LCIsIiMnIHdpdGhvdXQgZXhlY3V0aW5nIHRoZSBjb2RlIGluc2lkZSIsIiMnIG9mIHRoZSBkb2N1bWVudC4iLCIjJyIsIiMnIEBwYXJhbSBwYXRoIFJlbGF0aXZlIHBhdGggdG8gZmlsZS4iLCIjJyBAcGFyYW0gLi4uIEFkZGl0aW9uYWwgcGFyYW1ldGVycyBwYXNzZWQgdG8gdGhlIGByZWFkX2NodW5rYCBjYWxsLiIsIiMnIEBwYXJhbSByb3h5Z2VuX2NvbW1lbnRzIEZBTFNFOyBzaG91bGQgY29tbWVudHMgYmUgc3RyaXBwZWQgb3V0IGZyb20gZXh0ZXJuYWwgY29kZT8iLCIjJyBAcGFyYW0gdmVyYm9zZSBQcmludCBtZXNzYWdlcyB0byBzdGRlcnIuIiwiaW1wb3J0LmNodW5rcyA8LSBmdW5jdGlvbihwYXRoLCAuLi4sIHZlcmJvc2UgPSAuVkVSQk9TRSkge1xuICBpZiAodmVyYm9zZSkgeyBtZXNzYWdlKHNwcmludGYoXCJJbXBvcnRpbmcgY2h1bmtzIGZyb20gZXh0ZXJuYWwgc2NyaXB0OiAnJXMnLi4uXCIsIGJhc2VuYW1lKHBhdGgpKSkgfVxuICBmaWxlID0gaGVyZTo6aGVyZShwYXRoKVxuICBrbml0cjo6cmVhZF9jaHVuayhmaWxlLCAuLi4pXG59IiwiIiwiIycgVXNlIHJlbGF0aXZlIHBhdGggdG8gc291cmNlIGFuIiwiIycgZXh0ZXJuYWwgc2NyaXB0IGluIGl0cyBlbnRpcmV0eS4iLCIjJyIsIiMnIEBwYXJhbSBwYXRoIFJlbGF0aXZlIHBhdGggdG8gZmlsZS4iLCIjJyBAcGFyYW0gLi4uIEFkZGl0aW9uYWwgcGFyYW1ldGVycyBwYXNzZWQgdG8gdGhlIGBzb3VyY2VgIGNhbGwuIiwiIycgQHBhcmFtIHZlcmJvc2UgUHJpbnQgbWVzc2FnZXMgdG8gc3RkZXJyLiIsImltcG9ydC5zb3VyY2UgPC0gZnVuY3Rpb24ocGF0aCwgLi4uLCB2ZXJib3NlID0gLlZFUkJPU0UpIHtcbiAgaWYgKHZlcmJvc2UpIHsgbWVzc2FnZShzcHJpbnRmKFwiU291cmNpbmcgZXh0ZXJuYWwgc2NyaXB0OiAnJXMnLi4uXCIsIGJhc2VuYW1lKHBhdGgpKSkgfVxuICBzb3VyY2UoaGVyZTo6aGVyZShwYXRoKSwgLi4uLCBlY2hvID0gLlZFUkJPU0UpXG59Il19 -->
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Comments that begin with &#39;## ----&#39; can be used</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="co"># to separate content. R Studio provides them as </span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="co"># little bookmarks that you can use.</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="do">## ---- Hidden Variables ----</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>.VERBOSE <span class="ot">=</span> <span class="cn">TRUE</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>.FILEPATHS <span class="ot">=</span> <span class="fu">list</span>(</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">utils      =</span> <span class="fu">list</span>(</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>      <span class="at">.            =</span> <span class="st">&quot;R/utils.R&quot;</span>,</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>      <span class="at">dependencies =</span> <span class="st">&quot;R/utils/dependencies.R&quot;</span>,</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>      <span class="at">paths        =</span> <span class="st">&quot;R/utils/paths.R&quot;</span>,</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>      <span class="at">printf       =</span> <span class="st">&quot;R/utils/printf.R&quot;</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>  ),</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">packages   =</span> <span class="st">&quot;R/packages.R&quot;</span>,</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>  <span class="at">build      =</span> <span class="fu">list</span>(</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>      <span class="at">.            =</span> <span class="st">&quot;R/build.R&quot;</span>,</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>      <span class="at">dataset      =</span> <span class="st">&quot;R/build/dataset.R&quot;</span>,</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>      <span class="at">report       =</span> <span class="st">&quot;R/build/report.R&quot;</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>  ),</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>  <span class="at">analysis   =</span> <span class="fu">list</span>(</span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>      <span class="at">.            =</span> <span class="st">&quot;R/analysis.R&quot;</span>,</span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>      <span class="at">setup        =</span> <span class="st">&quot;R/analysis/setup.R&quot;</span>,</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>      <span class="at">eda          =</span> <span class="st">&quot;R/analysis/eda.R&quot;</span>,</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>      <span class="at">model        =</span> <span class="st">&quot;R/analysis/model.R&quot;</span>,</span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>      <span class="at">metrics      =</span> <span class="st">&quot;R/analysis/metrics.R&quot;</span>,</span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>      <span class="at">validation   =</span> <span class="st">&quot;R/analysis/validation.R&quot;</span></span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a><span class="do">## ---- Default Settings (Knit) ----</span></span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span>opts_knit<span class="sc">$</span><span class="fu">set</span>( </span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>  <span class="at">root.dir =</span> here<span class="sc">::</span><span class="fu">here</span>()</span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a><span class="do">## ---- Default Settings (Chunk) ----</span></span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span>opts_chunk<span class="sc">$</span><span class="fu">set</span>(</span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a>  <span class="do">## ---- Options (Execution) ----</span></span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a>  <span class="at">eval        =</span> <span class="cn">TRUE</span>,   <span class="co"># By default, turn off chunk evaluation.</span></span>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a>  <span class="at">cache       =</span> <span class="cn">FALSE</span>,  <span class="co"># By default, cache all chunk results.</span></span>
+<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a>  <span class="at">error       =</span> <span class="cn">FALSE</span>,   <span class="co"># Stop R when an error is raised.</span></span>
+<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a>  <span class="do">## ---- Options (Figure) ----</span></span>
+<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a>  <span class="at">fig.path    =</span> <span class="st">&#39;figure/&#39;</span>,</span>
+<span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a>  <span class="at">fig.keep    =</span> <span class="st">&#39;all&#39;</span>,</span>
+<span id="cb1-46"><a href="#cb1-46" aria-hidden="true" tabindex="-1"></a>  <span class="at">fig.align   =</span> <span class="st">&#39;center&#39;</span>,</span>
+<span id="cb1-47"><a href="#cb1-47" aria-hidden="true" tabindex="-1"></a>  <span class="at">fig.width   =</span> <span class="dv">8</span>,</span>
+<span id="cb1-48"><a href="#cb1-48" aria-hidden="true" tabindex="-1"></a>  <span class="at">fig.height  =</span> <span class="dv">6</span>,</span>
+<span id="cb1-49"><a href="#cb1-49" aria-hidden="true" tabindex="-1"></a>  <span class="at">dpi         =</span> <span class="dv">600</span>,</span>
+<span id="cb1-50"><a href="#cb1-50" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb1-51"><a href="#cb1-51" aria-hidden="true" tabindex="-1"></a>  <span class="do">## ---- Options (Formatting) ----</span></span>
+<span id="cb1-52"><a href="#cb1-52" aria-hidden="true" tabindex="-1"></a>  <span class="at">results     =</span> <span class="st">&#39;hold&#39;</span>,</span>
+<span id="cb1-53"><a href="#cb1-53" aria-hidden="true" tabindex="-1"></a>  <span class="at">collapse    =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb1-54"><a href="#cb1-54" aria-hidden="true" tabindex="-1"></a>  <span class="at">strip.white =</span> <span class="cn">FALSE</span>,  <span class="co"># Remove blank lines at beginning and end of the source code block output.</span></span>
+<span id="cb1-55"><a href="#cb1-55" aria-hidden="true" tabindex="-1"></a>  <span class="at">tidy        =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb1-56"><a href="#cb1-56" aria-hidden="true" tabindex="-1"></a>  <span class="at">size        =</span> <span class="st">&#39;tiny&#39;</span>,</span>
+<span id="cb1-57"><a href="#cb1-57" aria-hidden="true" tabindex="-1"></a>  <span class="at">R.options   =</span> <span class="fu">list</span>(<span class="at">width =</span> <span class="dv">60</span>),</span>
+<span id="cb1-58"><a href="#cb1-58" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-59"><a href="#cb1-59" aria-hidden="true" tabindex="-1"></a>  <span class="do">## ---- Options (Display) ----</span></span>
+<span id="cb1-60"><a href="#cb1-60" aria-hidden="true" tabindex="-1"></a>  <span class="at">include     =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb1-61"><a href="#cb1-61" aria-hidden="true" tabindex="-1"></a>  <span class="at">echo        =</span> <span class="cn">TRUE</span>,   </span>
+<span id="cb1-62"><a href="#cb1-62" aria-hidden="true" tabindex="-1"></a>  <span class="at">message     =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb1-63"><a href="#cb1-63" aria-hidden="true" tabindex="-1"></a>  <span class="at">warning     =</span> <span class="cn">TRUE</span></span>
+<span id="cb1-64"><a href="#cb1-64" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb1-65"><a href="#cb1-65" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-66"><a href="#cb1-66" aria-hidden="true" tabindex="-1"></a><span class="do">## ---- Utility Functions ----</span></span>
+<span id="cb1-67"><a href="#cb1-67" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-68"><a href="#cb1-68" aria-hidden="true" tabindex="-1"></a><span class="co">#&#39; Use relative path to import all</span></span>
+<span id="cb1-69"><a href="#cb1-69" aria-hidden="true" tabindex="-1"></a><span class="co">#&#39; chunks from an external script,</span></span>
+<span id="cb1-70"><a href="#cb1-70" aria-hidden="true" tabindex="-1"></a><span class="co">#&#39; without executing the code inside</span></span>
+<span id="cb1-71"><a href="#cb1-71" aria-hidden="true" tabindex="-1"></a><span class="co">#&#39; of the document.</span></span>
+<span id="cb1-72"><a href="#cb1-72" aria-hidden="true" tabindex="-1"></a><span class="co">#&#39;</span></span>
+<span id="cb1-73"><a href="#cb1-73" aria-hidden="true" tabindex="-1"></a><span class="co">#&#39; @param path Relative path to file.</span></span>
+<span id="cb1-74"><a href="#cb1-74" aria-hidden="true" tabindex="-1"></a><span class="co">#&#39; @param ... Additional parameters passed to the `read_chunk` call.</span></span>
+<span id="cb1-75"><a href="#cb1-75" aria-hidden="true" tabindex="-1"></a><span class="co">#&#39; @param roxygen_comments FALSE; should comments be stripped out from external code?</span></span>
+<span id="cb1-76"><a href="#cb1-76" aria-hidden="true" tabindex="-1"></a><span class="co">#&#39; @param verbose Print messages to stderr.</span></span>
+<span id="cb1-77"><a href="#cb1-77" aria-hidden="true" tabindex="-1"></a>import.chunks <span class="ot">&lt;-</span> <span class="cf">function</span>(path, ..., <span class="at">verbose =</span> .VERBOSE) {</span>
+<span id="cb1-78"><a href="#cb1-78" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (verbose) { <span class="fu">message</span>(<span class="fu">sprintf</span>(<span class="st">&quot;Importing chunks from external script: &#39;%s&#39;...&quot;</span>, <span class="fu">basename</span>(path))) }</span>
+<span id="cb1-79"><a href="#cb1-79" aria-hidden="true" tabindex="-1"></a>  file <span class="ot">=</span> here<span class="sc">::</span><span class="fu">here</span>(path)</span>
+<span id="cb1-80"><a href="#cb1-80" aria-hidden="true" tabindex="-1"></a>  knitr<span class="sc">::</span><span class="fu">read_chunk</span>(file, ...)</span>
+<span id="cb1-81"><a href="#cb1-81" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb1-82"><a href="#cb1-82" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-83"><a href="#cb1-83" aria-hidden="true" tabindex="-1"></a><span class="co">#&#39; Use relative path to source an</span></span>
+<span id="cb1-84"><a href="#cb1-84" aria-hidden="true" tabindex="-1"></a><span class="co">#&#39; external script in its entirety.</span></span>
+<span id="cb1-85"><a href="#cb1-85" aria-hidden="true" tabindex="-1"></a><span class="co">#&#39;</span></span>
+<span id="cb1-86"><a href="#cb1-86" aria-hidden="true" tabindex="-1"></a><span class="co">#&#39; @param path Relative path to file.</span></span>
+<span id="cb1-87"><a href="#cb1-87" aria-hidden="true" tabindex="-1"></a><span class="co">#&#39; @param ... Additional parameters passed to the `source` call.</span></span>
+<span id="cb1-88"><a href="#cb1-88" aria-hidden="true" tabindex="-1"></a><span class="co">#&#39; @param verbose Print messages to stderr.</span></span>
+<span id="cb1-89"><a href="#cb1-89" aria-hidden="true" tabindex="-1"></a>import.source <span class="ot">&lt;-</span> <span class="cf">function</span>(path, ..., <span class="at">verbose =</span> .VERBOSE) {</span>
+<span id="cb1-90"><a href="#cb1-90" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (verbose) { <span class="fu">message</span>(<span class="fu">sprintf</span>(<span class="st">&quot;Sourcing external script: &#39;%s&#39;...&quot;</span>, <span class="fu">basename</span>(path))) }</span>
+<span id="cb1-91"><a href="#cb1-91" aria-hidden="true" tabindex="-1"></a>  <span class="fu">source</span>(here<span class="sc">::</span><span class="fu">here</span>(path), ..., <span class="at">echo =</span> .VERBOSE)</span>
+<span id="cb1-92"><a href="#cb1-92" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjpbIiIsIiMjIC0tLS0gSW1wb3J0IChSL3V0aWxzLlIpIC0tLS0iLCJpbXBvcnQuY2h1bmtzKC5GSUxFUEFUSFMkdXRpbHMkLikiXX0= -->
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="do">## ---- Import (R/utils.R) ----</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="fu">import.chunks</span>(.FILEPATHS<span class="sc">$</span>utils<span class="sc">$</span>.)</span></code></pre></div>
+<!-- rnb-source-end -->
+<!-- rnb-message-begin eyJkYXRhIjoiSW1wb3J0aW5nIGNodW5rcyBmcm9tIGV4dGVybmFsIHNjcmlwdDogJ3V0aWxzLlInLi4uXG4ifQ== -->
+<pre><code>Importing chunks from external script: &#39;utils.R&#39;...</code></pre>
+<!-- rnb-message-end -->
+<!-- rnb-source-begin eyJkYXRhIjpbIiIsIiMjIC0tLS0gSW1wb3J0IChSL3BhY2thZ2VzLlIpIC0tLS0iLCJpbXBvcnQuY2h1bmtzKC5GSUxFUEFUSFMkcGFja2FnZXMpIl19 -->
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="do">## ---- Import (R/packages.R) ----</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="fu">import.chunks</span>(.FILEPATHS<span class="sc">$</span>packages)</span></code></pre></div>
+<!-- rnb-source-end -->
+<!-- rnb-message-begin eyJkYXRhIjoiSW1wb3J0aW5nIGNodW5rcyBmcm9tIGV4dGVybmFsIHNjcmlwdDogJ3BhY2thZ2VzLlInLi4uXG4ifQ== -->
+<pre><code>Importing chunks from external script: &#39;packages.R&#39;...</code></pre>
+<!-- rnb-message-end -->
+<!-- rnb-source-begin eyJkYXRhIjpbIiIsIiMjIC0tLS0gSW1wb3J0IChSL2J1aWxkLyopIC0tLS0iLCJpbXBvcnQuY2h1bmtzKC5GSUxFUEFUSFMkYnVpbGQkZGF0YXNldCkiXX0= -->
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="do">## ---- Import (R/build/*) ----</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="fu">import.chunks</span>(.FILEPATHS<span class="sc">$</span>build<span class="sc">$</span>dataset)</span></code></pre></div>
+<!-- rnb-source-end -->
+<!-- rnb-message-begin eyJkYXRhIjoiSW1wb3J0aW5nIGNodW5rcyBmcm9tIGV4dGVybmFsIHNjcmlwdDogJ2RhdGFzZXQuUicuLi5cbiJ9 -->
+<pre><code>Importing chunks from external script: &#39;dataset.R&#39;...</code></pre>
+<!-- rnb-message-end -->
+<!-- rnb-source-begin eyJkYXRhIjoiaW1wb3J0LmNodW5rcyguRklMRVBBVEhTJGJ1aWxkJHJlcG9ydCkifQ== -->
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">import.chunks</span>(.FILEPATHS<span class="sc">$</span>build<span class="sc">$</span>report)</span></code></pre></div>
+<!-- rnb-source-end -->
+<!-- rnb-message-begin eyJkYXRhIjoiSW1wb3J0aW5nIGNodW5rcyBmcm9tIGV4dGVybmFsIHNjcmlwdDogJ3JlcG9ydC5SJy4uLlxuIn0= -->
+<pre><code>Importing chunks from external script: &#39;report.R&#39;...</code></pre>
+<!-- rnb-message-end -->
+<!-- rnb-source-begin eyJkYXRhIjpbIiIsIiMjIC0tLS0gSW1wb3J0IChSL2FuYWx5c2lzLyopIC0tLS0iLCIiXX0= -->
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="do">## ---- Import (R/analysis/*) ----</span></span></code></pre></div>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjpbIiIsIiMjIC0tLS0gU291cmNlIChSL3V0aWxzLlIpIC0tLS0iLCJzb3VyY2UudXRpbHMobG9jYWwgPSBGQUxTRSwgZm9yY2UgPSBUUlVFLCB2ZXJib3NlID0gLlZFUkJPU0UpIl19 -->
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="do">## ---- Source (R/utils.R) ----</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="fu">source.utils</span>(<span class="at">local =</span> <span class="cn">FALSE</span>, <span class="at">force =</span> <span class="cn">TRUE</span>, <span class="at">verbose =</span> .VERBOSE)</span></code></pre></div>
+<!-- rnb-source-end -->
+<!-- rnb-message-begin eyJkYXRhIjoiTG9hZGluZyAzIHV0aWxpdCh5L2llcykuLi5cbiJ9 -->
+<pre><code>Loading 3 utilit(y/ies)...</code></pre>
+<!-- rnb-message-end -->
+<!-- rnb-message-begin eyJkYXRhIjoiTG9hZGluZyB1dGlsaXR5OiAncHJpbnRmJ1xuIn0= -->
+<pre><code>Loading utility: &#39;printf&#39;</code></pre>
+<!-- rnb-message-end -->
+<!-- rnb-message-begin eyJkYXRhIjoiTG9hZGluZyB1dGlsaXR5OiAncGF0aHMnXG4ifQ== -->
+<pre><code>Loading utility: &#39;paths&#39;</code></pre>
+<!-- rnb-message-end -->
+<!-- rnb-message-begin eyJkYXRhIjoiTG9hZGluZyB1dGlsaXR5OiAnZGVwZW5kZW5jaWVzJ1xuIn0= -->
+<pre><code>Loading utility: &#39;dependencies&#39;</code></pre>
+<!-- rnb-message-end -->
+<!-- rnb-source-begin eyJkYXRhIjpbIiIsIiMjIC0tLS0gU291cmNlIChSL3BhY2thZ2VzLlIpIC0tLS0iLCJpbnN0YWxsLmRlcHMoZmlsZSA9IFwicmVxdWlyZW1lbnRzLnR4dFwiKSIsIiJdfQ== -->
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="do">## ---- Source (R/packages.R) ----</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a><span class="fu">install.deps</span>(<span class="at">file =</span> <span class="st">&quot;requirements.txt&quot;</span>)</span></code></pre></div>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiKiBUaGUgcHJvamVjdCBpcyBhbHJlYWR5IHN5bmNocm9uaXplZCB3aXRoIHRoZSBsb2NrZmlsZS5cbiJ9 -->
+<pre><code>* The project is already synchronized with the lockfile.</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<!-- This section provides an overview of the report -->
+<p>In this assignment we will:</p>
+<ul>
+<li>Perform exploratory data analysis (<em>EDA</em>) on the dataset.</li>
+<li>Fit and analyze a linear discriminant analysis (<em>LDA</em>) model on the dataset.</li>
+<li>Perform multiple cross-validation tasks at different <span class="math inline">\(k\)</span>-fold values (<span class="math inline">\(k=3,\,k=10\)</span>).</li>
+</ul>
+</div>
+<div id="elt" class="section level2">
+<h2>ELT</h2>
+<p>Much of the <em>extract</em>, <em>load</em>, and <em>transform</em> (<em>ELT</em>) process from the previous report has been revised for this assignment. Notably, a <code>make.dataset()</code> function streamlines the process of parsing the source <code>Liver.txt</code> file into a compatible <code>data.frame</code>.</p>
+<!-- PAGE BREAK -->
+<div style="page-break-after: always;"></div>
+</div>
+<div id="session-information" class="section level2">
+<h2>Session Information</h2>
+<p><em>This document was generated from an <a href="http://rmarkdown.rstudio.com">R Markdown</a> Notebook (See the <code>vignettes/HW3_report.Rmd</code> in the project’s sub-directory). The setup chunk for this document sets the root directory to the project root directory using the <code>here</code> package; all file paths are relative to the project root.</em></p>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-output-begin eyJkYXRhIjoiUiB2ZXJzaW9uIDQuMS4xICgyMDIxLTA4LTEwKVxuUGxhdGZvcm06IHg4Nl82NC13NjQtbWluZ3czMi94NjQgKDY0LWJpdClcblJ1bm5pbmcgdW5kZXI6IFdpbmRvd3MgMTAgeDY0IChidWlsZCAxOTA0MilcblxuTWF0cml4IHByb2R1Y3RzOiBkZWZhdWx0XG5cbmxvY2FsZTpcblsxXSBMQ19DT0xMQVRFPUVuZ2xpc2hfVW5pdGVkIFN0YXRlcy4xMjUyIFxuWzJdIExDX0NUWVBFPUVuZ2xpc2hfVW5pdGVkIFN0YXRlcy4xMjUyICAgXG5bM10gTENfTU9ORVRBUlk9RW5nbGlzaF9Vbml0ZWQgU3RhdGVzLjEyNTJcbls0XSBMQ19OVU1FUklDPUMgICAgICAgICAgICAgICAgICAgICAgICAgIFxuWzVdIExDX1RJTUU9RW5nbGlzaF9Vbml0ZWQgU3RhdGVzLjEyNTIgICAgXG5cbmF0dGFjaGVkIGJhc2UgcGFja2FnZXM6XG5bMV0gc3RhdHMgICAgIGdyYXBoaWNzICBnckRldmljZXMgZGF0YXNldHMgIHV0aWxzICAgIFxuWzZdIG1ldGhvZHMgICBiYXNlICAgICBcblxub3RoZXIgYXR0YWNoZWQgcGFja2FnZXM6XG4gWzFdIGRwbHlyXzEuMC43ICAgIHRpZHlyXzEuMS40ICAgIGZvcmNhdHNfMC41LjEgXG4gWzRdIGdncGxvdDJfMy4zLjUgIGZvcmVhY2hfMS41LjEgIG1hZ3JpdHRyXzIuMC4xXG4gWzddIG1pbWVfMC4xMiAgICAgIG1hcmtkb3duXzEuMSAgIHJtYXJrZG93bl8yLjExXG5bMTBdIGtuaXRyXzEuMzYgICAgXG5cbmxvYWRlZCB2aWEgYSBuYW1lc3BhY2UgKGFuZCBub3QgYXR0YWNoZWQpOlxuIFsxXSBjb21waWxlcl80LjEuMSAgIHBpbGxhcl8xLjYuMyAgICAganF1ZXJ5bGliXzAuMS40IFxuIFs0XSBpdGVyYXRvcnNfMS4wLjEzIHRvb2xzXzQuMS4xICAgICAgYml0XzQuMC40ICAgICAgIFxuIFs3XSBkaWdlc3RfMC42LjI4ICAgIGNvcnJwbG90XzAuOTAgICAganNvbmxpdGVfMS43LjIgIFxuWzEwXSBldmFsdWF0ZV8wLjE0ICAgIGxpZmVjeWNsZV8xLjAuMSAgdGliYmxlXzMuMS41ICAgIFxuWzEzXSBndGFibGVfMC4zLjAgICAgIHBrZ2NvbmZpZ18yLjAuMyAgcmxhbmdfMC40LjExICAgIFxuWzE2XSBwYXJhbGxlbF80LjEuMSAgIHlhbWxfMi4yLjEgICAgICAgeGZ1bl8wLjI2ICAgICAgIFxuWzE5XSBmYXN0bWFwXzEuMS4wICAgIHdpdGhyXzIuNC4yICAgICAgc3RyaW5ncl8xLjQuMCAgIFxuWzIyXSBobXNfMS4xLjEgICAgICAgIGdlbmVyaWNzXzAuMS4wICAgdmN0cnNfMC4zLjggICAgIFxuWzI1XSBiaXQ2NF80LjAuNSAgICAgIHRpZHlzZWxlY3RfMS4xLjEgcnByb2pyb290XzIuMC4yIFxuWzI4XSBncmlkXzQuMS4xICAgICAgIGdsdWVfMS40LjIgICAgICAgaGVyZV8xLjAuMSAgICAgIFxuWzMxXSBSNl8yLjUuMSAgICAgICAgIGZhbnNpXzAuNS4wICAgICAgdnJvb21fMS41LjUgICAgIFxuWzM0XSB0emRiXzAuMS4yICAgICAgIHJlYWRyXzIuMC4yICAgICAgcHVycnJfMC4zLjQgICAgIFxuWzM3XSBzY2FsZXNfMS4xLjEgICAgIGNvZGV0b29sc18wLjItMTggaHRtbHRvb2xzXzAuNS4yIFxuWzQwXSBlbGxpcHNpc18wLjMuMiAgIGNvbG9yc3BhY2VfMi4wLTIgcmVudl8wLjE0LjAgICAgIFxuWzQzXSB1dGY4XzEuMi4yICAgICAgIHN0cmluZ2lfMS43LjUgICAgbXVuc2VsbF8wLjUuMCAgIFxuWzQ2XSBjcmF5b25fMS40LjEgICAgXG4ifQ== -->
+<pre><code>R version 4.1.1 (2021-08-10)
+Platform: x86_64-w64-mingw32/x64 (64-bit)
+Running under: Windows 10 x64 (build 19042)
 
-<div id="rmd-source-code">LS0tDQojIERvY3VtZW50IG1ldGFkYXRhIGluZm9ybWF0aW9uOg0KdGl0bGU6ICJIb21ld29yayAzIFJlcG9ydCINCnN1YnRpdGxlOiBDbGFzc2lmaWNhdGlvbiBvZiBsaXZlciBtYWxmdW5jdGlvbiBzZXZlcml0eSAoTERBKQ0KYXV0aG9yOiBJYW4gRWZmZW5kaSBcXCBpYWUyNzg0QHJpdC5lZHUNCmRhdGU6IE9jdG9iZXIgOSwgMjAyMQ0KIyBPdXRwdXQgZm9ybWF0czoNCm91dHB1dDoNCiAgIyBPdXRwdXQgYXMgYSBwcmV2aWV3YWJsZSBIVE1MIE5vdGVib29rLg0KICBodG1sX25vdGVib29rOg0KICAgIHRoZW1lOiB1bml0ZWQNCiAgICBoaWdobGlnaHQ6IHRhbmdvDQogICAgZGZfcHJpbnQ6IHBhZ2VkDQogICAgdG9jOiB0cnVlDQogICAgdG9jX2RlcHRoOiAyDQogICMgT3V0cHV0IGFzIGFuIHJtYXJrZG93bjo6cGRmX2RvY3VtZW50KCkNCiAgcGRmX2RvY3VtZW50Og0KICAgIGtlZXBfdGV4OiB0cnVlDQogICAgaGlnaGxpZ2h0OiB0YW5nbw0KICAgIGZpZ19jYXB0aW9uOiB0cnVlDQogICAgZGZfcHJpbnQ6IGthYmxlDQogICAgdG9jOiB0cnVlDQogICAgdG9jX2RlcHRoOiAzDQojIFBhY2thZ2UgdmlnbmV0dGUgb3B0aW9uczoNCnZpZ25ldHRlOiA+DQogICVcVmlnbmV0dGVJbmRleEVudHJ5e0hvbWV3b3JrIDIgUmVwb3J0fQ0KICAlXFZpZ25ldHRlRW5naW5le2tuaXRyOjpybWFya2Rvd259DQogICVcVmlnbmV0dGVFbmNvZGluZ3tVVEYtOH0NCiMgcGFuZG9jIC0+IHBkZkxhVGVYIHJlbmRlcmluZyBvcHRpb25zOg0KZm9udHNpemU6IDExcHQNCmdlb21ldHJ5Og0KICAtIG1hcmdpbj0xaW4NCiAgLSBoZWlnaHRyb3VuZGVkDQpkb2N1bWVudGNsYXNzOiBzY3JhcnRjbA0KcGFwZXJzaXplOiBhNA0KdXJsY29sb3I6IHZpb2xldA0KdG9jY29sb3I6IGJsdWUNCiMgQ3VzdG9tIGtuaXQgZnVuY3Rpb24uDQprbml0OiAoZnVuY3Rpb24oaW5wdXRGaWxlLCBlbmNvZGluZyl7DQogIHJtYXJrZG93bjo6cmVuZGVyKGlucHV0RmlsZSwgZW5jb2RpbmcgPSBlbmNvZGluZywgDQogIG91dHB1dF9kaXIgPSAidmlnbmV0dGVzL291dCIsIA0KICBvdXRwdXRfZm9ybWF0PSJhbGwiKSB9KQ0KLS0tDQoNCkV4YW1wbGUgcmVwb3J0Lg0K</div>
+Matrix products: default
+
+locale:
+[1] LC_COLLATE=English_United States.1252 
+[2] LC_CTYPE=English_United States.1252   
+[3] LC_MONETARY=English_United States.1252
+[4] LC_NUMERIC=C                          
+[5] LC_TIME=English_United States.1252    
+
+attached base packages:
+[1] stats     graphics  grDevices datasets  utils    
+[6] methods   base     
+
+other attached packages:
+ [1] dplyr_1.0.7    tidyr_1.1.4    forcats_0.5.1 
+ [4] ggplot2_3.3.5  foreach_1.5.1  magrittr_2.0.1
+ [7] mime_0.12      markdown_1.1   rmarkdown_2.11
+[10] knitr_1.36    
+
+loaded via a namespace (and not attached):
+ [1] compiler_4.1.1   pillar_1.6.3     jquerylib_0.1.4 
+ [4] iterators_1.0.13 tools_4.1.1      bit_4.0.4       
+ [7] digest_0.6.28    corrplot_0.90    jsonlite_1.7.2  
+[10] evaluate_0.14    lifecycle_1.0.1  tibble_3.1.5    
+[13] gtable_0.3.0     pkgconfig_2.0.3  rlang_0.4.11    
+[16] parallel_4.1.1   yaml_2.2.1       xfun_0.26       
+[19] fastmap_1.1.0    withr_2.4.2      stringr_1.4.0   
+[22] hms_1.1.1        generics_0.1.0   vctrs_0.3.8     
+[25] bit64_4.0.5      tidyselect_1.1.1 rprojroot_2.0.2 
+[28] grid_4.1.1       glue_1.4.2       here_1.0.1      
+[31] R6_2.5.1         fansi_0.5.0      vroom_1.5.5     
+[34] tzdb_0.1.2       readr_2.0.2      purrr_0.3.4     
+[37] scales_1.1.1     codetools_0.2-18 htmltools_0.5.2 
+[40] ellipsis_0.3.2   colorspace_2.0-2 renv_0.14.0     
+[43] utf8_1.2.2       stringi_1.7.5    munsell_0.5.0   
+[46] crayon_1.4.1    </code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-chunk-end -->
+</div>
+
+<div id="rmd-source-code">LS0tDQojIERvY3VtZW50IG1ldGFkYXRhIGluZm9ybWF0aW9uOg0KdGl0bGU6ICJIb21ld29yayAzIFJlcG9ydCINCnN1YnRpdGxlOiBDbGFzc2lmaWNhdGlvbiBvZiBsaXZlciBtYWxmdW5jdGlvbiBzZXZlcml0eSAoTERBKQ0KYXV0aG9yOiBJYW4gRWZmZW5kaSBcXCBpYWUyNzg0QHJpdC5lZHUNCmRhdGU6ICJgciBmb3JtYXQoU3lzLnRpbWUoKSwgJyVCICVkLCAlWScpYCINCiMgT3V0cHV0IGZvcm1hdHM6DQpvdXRwdXQ6DQogICMgT3V0cHV0IGFzIGEgcHJldmlld2FibGUgSFRNTCBOb3RlYm9vay4NCiAgaHRtbF9ub3RlYm9vazoNCiAgICB0aGVtZTogdW5pdGVkDQogICAgaGlnaGxpZ2h0OiB0YW5nbw0KICAgIGRmX3ByaW50OiBwYWdlZA0KICAgIHRvYzogdHJ1ZQ0KICAgIHRvY19kZXB0aDogMg0KICAjIE91dHB1dCBhcyBhbiBybWFya2Rvd246OnBkZl9kb2N1bWVudCgpDQogIHBkZl9kb2N1bWVudDoNCiAgICBrZWVwX3RleDogdHJ1ZQ0KICAgIGhpZ2hsaWdodDogdGFuZ28NCiAgICBmaWdfY2FwdGlvbjogdHJ1ZQ0KICAgIGRmX3ByaW50OiBrYWJsZQ0KICAgIHRvYzogdHJ1ZQ0KICAgIHRvY19kZXB0aDogMw0KIyBwYW5kb2MgLT4gcGRmTGFUZVggcmVuZGVyaW5nIG9wdGlvbnM6DQpmb250c2l6ZTogMTFwdA0KZ2VvbWV0cnk6DQogIC0gbWFyZ2luPTFpbg0KICAtIGhlaWdodHJvdW5kZWQNCmRvY3VtZW50Y2xhc3M6IHNjcmFydGNsDQpwYXBlcnNpemU6IGE0DQp1cmxjb2xvcjogdmlvbGV0DQp0b2Njb2xvcjogYmx1ZQ0KIyBDdXN0b20ga25pdCBmdW5jdGlvbi4NCiNrbml0OiAoZnVuY3Rpb24oaW5wdXRGaWxlLCBlbmNvZGluZyl7DQojICBybWFya2Rvd246OnJlbmRlcihpbnB1dEZpbGUsIGVuY29kaW5nID0gZW5jb2RpbmcsIA0KIyAgb3V0cHV0X2RpciA9ICJ2aWduZXR0ZXMvb3V0IiwgDQojICBvdXRwdXRfZm9ybWF0PSJhbGwiKSB9KQ0KLS0tDQoNCiMjIENlcnRpZmljYXRpb24NCg0KPiBJIGNlcnRpZnkgdGhhdCBJIGluZGVlZCBmaW5pc2hlZCByZWFkaW5nIENoLiA0IGZyb20gKkFuIEludHJvZHVjdGlvbiB0byBTdGF0aXN0aWNhbCBMZWFybmluZyosIGJ5IEphbWVzIEdhcmV0aCwgRGFuaWVsYSBXaXR0ZW4sIFRyZXZvciBIYXN0aWUsIFJvYmVydCBUaWJzaGlyYW5pLg0KDQojIyBPdmVydmlldw0KDQpgYGB7ciBzZXR1cCwgZWNobz1GQUxTRSwgaW5jbHVkZT1GQUxTRSwgcmVzdWx0cz0naG9sZCd9DQojfCBpbmNsdWRlID0gVFJVRSwgZWNobyA9IFRSVUUsIG1lc3NhZ2UgPSBUUlVFLCB3YXJuaW5nID0gVFJVRSwgZXJyb3IgPSBUUlVFDQoNCiMgQ29tbWVudHMgdGhhdCBiZWdpbiB3aXRoICcjIyAtLS0tJyBjYW4gYmUgdXNlZA0KIyB0byBzZXBhcmF0ZSBjb250ZW50LiBSIFN0dWRpbyBwcm92aWRlcyB0aGVtIGFzIA0KIyBsaXR0bGUgYm9va21hcmtzIHRoYXQgeW91IGNhbiB1c2UuDQoNCiMjIC0tLS0gSGlkZGVuIFZhcmlhYmxlcyAtLS0tDQouVkVSQk9TRSA9IFRSVUUNCi5GSUxFUEFUSFMgPSBsaXN0KA0KICB1dGlscyAgICAgID0gbGlzdCgNCiAgICAgIC4gICAgICAgICAgICA9ICJSL3V0aWxzLlIiLA0KICAgICAgZGVwZW5kZW5jaWVzID0gIlIvdXRpbHMvZGVwZW5kZW5jaWVzLlIiLA0KICAgICAgcGF0aHMgICAgICAgID0gIlIvdXRpbHMvcGF0aHMuUiIsDQogICAgICBwcmludGYgICAgICAgPSAiUi91dGlscy9wcmludGYuUiINCiAgKSwNCiAgcGFja2FnZXMgICA9ICJSL3BhY2thZ2VzLlIiLA0KICBidWlsZCAgICAgID0gbGlzdCgNCiAgICAgIC4gICAgICAgICAgICA9ICJSL2J1aWxkLlIiLA0KICAgICAgZGF0YXNldCAgICAgID0gIlIvYnVpbGQvZGF0YXNldC5SIiwNCiAgICAgIHJlcG9ydCAgICAgICA9ICJSL2J1aWxkL3JlcG9ydC5SIg0KICApLA0KICBhbmFseXNpcyAgID0gbGlzdCgNCiAgICAgIC4gICAgICAgICAgICA9ICJSL2FuYWx5c2lzLlIiLA0KICAgICAgc2V0dXAgICAgICAgID0gIlIvYW5hbHlzaXMvc2V0dXAuUiIsDQogICAgICBlZGEgICAgICAgICAgPSAiUi9hbmFseXNpcy9lZGEuUiIsDQogICAgICBtb2RlbCAgICAgICAgPSAiUi9hbmFseXNpcy9tb2RlbC5SIiwNCiAgICAgIG1ldHJpY3MgICAgICA9ICJSL2FuYWx5c2lzL21ldHJpY3MuUiIsDQogICAgICB2YWxpZGF0aW9uICAgPSAiUi9hbmFseXNpcy92YWxpZGF0aW9uLlIiDQogICkNCikNCg0KIyMgLS0tLSBEZWZhdWx0IFNldHRpbmdzIChLbml0KSAtLS0tDQprbml0cjo6b3B0c19rbml0JHNldCggDQogIHJvb3QuZGlyID0gaGVyZTo6aGVyZSgpDQopDQoNCiMjIC0tLS0gRGVmYXVsdCBTZXR0aW5ncyAoQ2h1bmspIC0tLS0NCmtuaXRyOjpvcHRzX2NodW5rJHNldCgNCiAgDQogICMjIC0tLS0gT3B0aW9ucyAoRXhlY3V0aW9uKSAtLS0tDQogIGV2YWwgICAgICAgID0gVFJVRSwgICAjIEJ5IGRlZmF1bHQsIHR1cm4gb2ZmIGNodW5rIGV2YWx1YXRpb24uDQogIGNhY2hlICAgICAgID0gRkFMU0UsICAjIEJ5IGRlZmF1bHQsIGNhY2hlIGFsbCBjaHVuayByZXN1bHRzLg0KICBlcnJvciAgICAgICA9IEZBTFNFLCAgICMgU3RvcCBSIHdoZW4gYW4gZXJyb3IgaXMgcmFpc2VkLg0KICANCiAgIyMgLS0tLSBPcHRpb25zIChGaWd1cmUpIC0tLS0NCiAgZmlnLnBhdGggICAgPSAnZmlndXJlLycsDQogIGZpZy5rZWVwICAgID0gJ2FsbCcsDQogIGZpZy5hbGlnbiAgID0gJ2NlbnRlcicsDQogIGZpZy53aWR0aCAgID0gOCwNCiAgZmlnLmhlaWdodCAgPSA2LA0KICBkcGkgICAgICAgICA9IDYwMCwNCiAgDQogICMjIC0tLS0gT3B0aW9ucyAoRm9ybWF0dGluZykgLS0tLQ0KICByZXN1bHRzICAgICA9ICdob2xkJywNCiAgY29sbGFwc2UgICAgPSBGQUxTRSwNCiAgc3RyaXAud2hpdGUgPSBGQUxTRSwgICMgUmVtb3ZlIGJsYW5rIGxpbmVzIGF0IGJlZ2lubmluZyBhbmQgZW5kIG9mIHRoZSBzb3VyY2UgY29kZSBibG9jayBvdXRwdXQuDQogIHRpZHkgICAgICAgID0gRkFMU0UsDQogIHNpemUgICAgICAgID0gJ3RpbnknLA0KICBSLm9wdGlvbnMgICA9IGxpc3Qod2lkdGggPSA2MCksDQoNCiAgIyMgLS0tLSBPcHRpb25zIChEaXNwbGF5KSAtLS0tDQogIGluY2x1ZGUgICAgID0gVFJVRSwNCiAgZWNobyAgICAgICAgPSBUUlVFLCAgIA0KICBtZXNzYWdlICAgICA9IFRSVUUsDQogIHdhcm5pbmcgICAgID0gVFJVRQ0KKQ0KDQojIyAtLS0tIFV0aWxpdHkgRnVuY3Rpb25zIC0tLS0NCg0KIycgVXNlIHJlbGF0aXZlIHBhdGggdG8gaW1wb3J0IGFsbA0KIycgY2h1bmtzIGZyb20gYW4gZXh0ZXJuYWwgc2NyaXB0LA0KIycgd2l0aG91dCBleGVjdXRpbmcgdGhlIGNvZGUgaW5zaWRlDQojJyBvZiB0aGUgZG9jdW1lbnQuDQojJw0KIycgQHBhcmFtIHBhdGggUmVsYXRpdmUgcGF0aCB0byBmaWxlLg0KIycgQHBhcmFtIC4uLiBBZGRpdGlvbmFsIHBhcmFtZXRlcnMgcGFzc2VkIHRvIHRoZSBgcmVhZF9jaHVua2AgY2FsbC4NCiMnIEBwYXJhbSByb3h5Z2VuX2NvbW1lbnRzIEZBTFNFOyBzaG91bGQgY29tbWVudHMgYmUgc3RyaXBwZWQgb3V0IGZyb20gZXh0ZXJuYWwgY29kZT8NCiMnIEBwYXJhbSB2ZXJib3NlIFByaW50IG1lc3NhZ2VzIHRvIHN0ZGVyci4NCmltcG9ydC5jaHVua3MgPC0gZnVuY3Rpb24ocGF0aCwgLi4uLCB2ZXJib3NlID0gLlZFUkJPU0UpIHsNCiAgaWYgKHZlcmJvc2UpIHsgbWVzc2FnZShzcHJpbnRmKCJJbXBvcnRpbmcgY2h1bmtzIGZyb20gZXh0ZXJuYWwgc2NyaXB0OiAnJXMnLi4uIiwgYmFzZW5hbWUocGF0aCkpKSB9DQogIGZpbGUgPSBoZXJlOjpoZXJlKHBhdGgpDQogIGtuaXRyOjpyZWFkX2NodW5rKGZpbGUsIC4uLikNCn0NCg0KIycgVXNlIHJlbGF0aXZlIHBhdGggdG8gc291cmNlIGFuDQojJyBleHRlcm5hbCBzY3JpcHQgaW4gaXRzIGVudGlyZXR5Lg0KIycNCiMnIEBwYXJhbSBwYXRoIFJlbGF0aXZlIHBhdGggdG8gZmlsZS4NCiMnIEBwYXJhbSAuLi4gQWRkaXRpb25hbCBwYXJhbWV0ZXJzIHBhc3NlZCB0byB0aGUgYHNvdXJjZWAgY2FsbC4NCiMnIEBwYXJhbSB2ZXJib3NlIFByaW50IG1lc3NhZ2VzIHRvIHN0ZGVyci4NCmltcG9ydC5zb3VyY2UgPC0gZnVuY3Rpb24ocGF0aCwgLi4uLCB2ZXJib3NlID0gLlZFUkJPU0UpIHsNCiAgaWYgKHZlcmJvc2UpIHsgbWVzc2FnZShzcHJpbnRmKCJTb3VyY2luZyBleHRlcm5hbCBzY3JpcHQ6ICclcycuLi4iLCBiYXNlbmFtZShwYXRoKSkpIH0NCiAgc291cmNlKGhlcmU6OmhlcmUocGF0aCksIC4uLiwgZWNobyA9IC5WRVJCT1NFKQ0KfQ0KYGBgDQoNCmBgYHtyIGltcG9ydC1jaHVua3N9DQoNCiMjIC0tLS0gSW1wb3J0IChSL3V0aWxzLlIpIC0tLS0NCmltcG9ydC5jaHVua3MoLkZJTEVQQVRIUyR1dGlscyQuKQ0KDQojIyAtLS0tIEltcG9ydCAoUi9wYWNrYWdlcy5SKSAtLS0tDQppbXBvcnQuY2h1bmtzKC5GSUxFUEFUSFMkcGFja2FnZXMpDQoNCiMjIC0tLS0gSW1wb3J0IChSL2J1aWxkLyopIC0tLS0NCmltcG9ydC5jaHVua3MoLkZJTEVQQVRIUyRidWlsZCRkYXRhc2V0KQ0KaW1wb3J0LmNodW5rcyguRklMRVBBVEhTJGJ1aWxkJHJlcG9ydCkNCg0KIyMgLS0tLSBJbXBvcnQgKFIvYW5hbHlzaXMvKikgLS0tLQ0KDQoNCmBgYA0KDQoNCg0KYGBge3IgaW1wb3J0LXNvdXJjZXN9DQoNCiMjIC0tLS0gU291cmNlIChSL3V0aWxzLlIpIC0tLS0NCnNvdXJjZS51dGlscyhsb2NhbCA9IEZBTFNFLCBmb3JjZSA9IFRSVUUsIHZlcmJvc2UgPSAuVkVSQk9TRSkNCg0KIyMgLS0tLSBTb3VyY2UgKFIvcGFja2FnZXMuUikgLS0tLQ0KaW5zdGFsbC5kZXBzKGZpbGUgPSAicmVxdWlyZW1lbnRzLnR4dCIpDQoNCg0KYGBgDQoNCjwhLS0gVGhpcyBzZWN0aW9uIHByb3ZpZGVzIGFuIG92ZXJ2aWV3IG9mIHRoZSByZXBvcnQgLS0+DQoNCkluIHRoaXMgYXNzaWdubWVudCB3ZSB3aWxsOg0KDQotIFBlcmZvcm0gZXhwbG9yYXRvcnkgZGF0YSBhbmFseXNpcyAoKkVEQSopIG9uIHRoZSBkYXRhc2V0Lg0KLSBGaXQgYW5kIGFuYWx5emUgYSBsaW5lYXIgZGlzY3JpbWluYW50IGFuYWx5c2lzICgqTERBKikgbW9kZWwgb24gdGhlIGRhdGFzZXQuDQotIFBlcmZvcm0gbXVsdGlwbGUgY3Jvc3MtdmFsaWRhdGlvbiB0YXNrcyBhdCBkaWZmZXJlbnQgJGskLWZvbGQgdmFsdWVzICgkaz0zLFwsaz0xMCQpLg0KDQojIyBFTFQNCg0KTXVjaCBvZiB0aGUgKmV4dHJhY3QqLCAqbG9hZCosIGFuZCAqdHJhbnNmb3JtKiAoKkVMVCopIHByb2Nlc3MgZnJvbSB0aGUgcHJldmlvdXMgcmVwb3J0IGhhcyBiZWVuIHJldmlzZWQgZm9yIHRoaXMgYXNzaWdubWVudC4gTm90YWJseSwgYSBgbWFrZS5kYXRhc2V0KClgIGZ1bmN0aW9uIHN0cmVhbWxpbmVzIHRoZSBwcm9jZXNzIG9mIHBhcnNpbmcgdGhlIHNvdXJjZSBgTGl2ZXIudHh0YCBmaWxlIGludG8gYSBjb21wYXRpYmxlIGBkYXRhLmZyYW1lYC4NCg0KPCEtLSBQQUdFIEJSRUFLIC0tPg0KXG5ld3BhZ2UNCg0KIyMgU2Vzc2lvbiBJbmZvcm1hdGlvbg0KDQoqVGhpcyBkb2N1bWVudCB3YXMgZ2VuZXJhdGVkIGZyb20gYW4gW1IgTWFya2Rvd25dKGh0dHA6Ly9ybWFya2Rvd24ucnN0dWRpby5jb20pIE5vdGVib29rIChTZWUgdGhlIGB2aWduZXR0ZXMvSFczX3JlcG9ydC5SbWRgIGluIHRoZSBwcm9qZWN0J3Mgc3ViLWRpcmVjdG9yeSkuIFRoZSBzZXR1cCBjaHVuayBmb3IgdGhpcyBkb2N1bWVudCBzZXRzIHRoZSByb290IGRpcmVjdG9yeSB0byB0aGUgcHJvamVjdCByb290IGRpcmVjdG9yeSB1c2luZyB0aGUgYGhlcmVgIHBhY2thZ2U7IGFsbCBmaWxlIHBhdGhzIGFyZSByZWxhdGl2ZSB0byB0aGUgcHJvamVjdCByb290LioNCg0KYGBge3Igc2Vzc2lvbi1pbmZvLCBlY2hvPUZBTFNFfQ0Kc2Vzc2lvbkluZm8oKQ0KYGBgDQo=</div>
 
 
 

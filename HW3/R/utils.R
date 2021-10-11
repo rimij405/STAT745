@@ -2,15 +2,16 @@
 #
 # Common utility functions.
 
-.UTILS <- list(
+## ---- def-utils ----
+
+UTILS <- list(
     printf = here::here("R/utils/printf.R"),
     paths = here::here("R/utils/paths.R"),
-    memory = here::here("R/utils/memory.R"),
     dependencies = here::here("R/utils/dependencies.R")
 )
 
-source.utils <- function(files = names(.UTILS), ..., force = FALSE, verbose = FALSE) {
-
+#' Source the additional utilities.
+source.utils <- function(files = names(UTILS), ..., local = FALSE, force = FALSE, verbose = FALSE) {
   # Calculate the current md5.
   current_utils <- as.vector(files)
 
@@ -38,22 +39,17 @@ source.utils <- function(files = names(.UTILS), ..., force = FALSE, verbose = FA
 
   if (!skip) {
     if (is.na(files) || length(files) == 0) {
-      print("No utility functions to load.")
+      message("No utility functions to load.")
     } else {
-      if (verbose) { print(sprintf("Loading %s utilit(y/ies)...", length(files))) }
+      if (verbose) { message(sprintf("Loading %s utilit(y/ies)...", length(files))) }
       for (i in 1:length(files)) {
         file <- files[i]
-        path <- get(file, .UTILS)
-        if (verbose) { print(sprintf("Loading utility: '%s'", file)) }
-        source(path)
+        path <- get(file, UTILS)
+        if (verbose) { message(sprintf("Loading utility: '%s'", file)) }
+        source(path, local = local)
       }
     }
   } else if (verbose) {
-    print("Utilities already loaded.")
+    message("Utilities already loaded.")
   }
-
-  return(NULL)
 }
-
-# Source the utilities.
-source.utils(force = FALSE, verbose = FALSE)

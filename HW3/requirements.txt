@@ -4,7 +4,10 @@ forcats
 foreach
 ggplot2
 here
+knitr
 magrittr
+markdown
+mime
 readr
 renv
 rmarkdown

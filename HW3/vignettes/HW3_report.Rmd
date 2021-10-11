@@ -3,7 +3,7 @@
 title: "Homework 3 Report"
 subtitle: Classification of liver malfunction severity (LDA)
 author: Ian Effendi \\ iae2784@rit.edu
-date: October 9, 2021
+date: "`r format(Sys.time(), '%B %d, %Y')`"
 # Output formats:
 output:
   # Output as a previewable HTML Notebook.
@@ -21,11 +21,6 @@ output:
     df_print: kable
     toc: true
     toc_depth: 3
-# Package vignette options:
-vignette: >
-  %\VignetteIndexEntry{Homework 2 Report}
-  %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
 # pandoc -> pdfLaTeX rendering options:
 fontsize: 11pt
 geometry:
@@ -36,10 +31,174 @@ papersize: a4
 urlcolor: violet
 toccolor: blue
 # Custom knit function.
-knit: (function(inputFile, encoding){
-  rmarkdown::render(inputFile, encoding = encoding, 
-  output_dir = "vignettes/out", 
-  output_format="all") })
+#knit: (function(inputFile, encoding){
+#  rmarkdown::render(inputFile, encoding = encoding, 
+#  output_dir = "vignettes/out", 
+#  output_format="all") })
 ---
 
-Example report.
+## Certification
+
+> I certify that I indeed finished reading Ch. 4 from *An Introduction to Statistical Learning*, by James Gareth, Daniela Witten, Trevor Hastie, Robert Tibshirani.
+
+## Overview
+
+```{r setup, echo=FALSE, include=FALSE, results='hold'}
+#| include = TRUE, echo = TRUE, message = TRUE, warning = TRUE, error = TRUE
+
+# Comments that begin with '## ----' can be used
+# to separate content. R Studio provides them as 
+# little bookmarks that you can use.
+
+## ---- Hidden Variables ----
+.VERBOSE   <- TRUE
+.FILEPATHS <- list(
+  utils      = list(
+      .            = "R/utils.R",
+      dependencies = "R/utils/dependencies.R",
+      paths        = "R/utils/paths.R",
+      printf       = "R/utils/printf.R"
+  ),
+  packages   = "R/packages.R",
+  build      = list(
+      .            = "R/build.R",
+      dataset      = "R/build/dataset.R",
+      report       = "R/build/report.R"
+  ),
+  analysis   = list(
+      .            = "R/analysis.R",
+      setup        = "R/analysis/setup.R",
+      eda          = "R/analysis/eda.R",
+      model        = "R/analysis/model.R",
+      metrics      = "R/analysis/metrics.R",
+      validation   = "R/analysis/validation.R"
+  )
+)
+
+## ---- Default Settings (Knit) ----
+knitr::opts_knit$set( 
+  root.dir = here::here()
+)
+
+## ---- Default Settings (Chunk) ----
+knitr::opts_chunk$set(
+  
+  ## ---- Options (Execution) ----
+  eval        = TRUE,   # By default, turn off chunk evaluation.
+  cache       = FALSE,  # By default, cache all chunk results.
+  error       = FALSE,   # Stop R when an error is raised.
+  
+  ## ---- Options (Figure) ----
+  fig.path    = 'figure/',
+  fig.keep    = 'all',
+  fig.align   = 'center',
+  fig.width   = 8,
+  fig.height  = 6,
+  dpi         = 600,
+  
+  ## ---- Options (Formatting) ----
+  results     = 'hold',
+  collapse    = FALSE,
+  strip.white = FALSE,  # Remove blank lines at beginning and end of the source code block output.
+  tidy        = FALSE,
+  size        = 'tiny',
+  R.options   = list(width = 60),
+
+  ## ---- Options (Display) ----
+  include     = TRUE,
+  echo        = TRUE,   
+  message     = TRUE,
+  warning     = TRUE
+)
+
+knitr::read_chunk(here::here(.FILEPATHS$utils$.))
+knitr::read_chunk(here::here(.FILEPATHS$packages))
+knitr::read_chunk(here::here(.FILEPATHS$build$.))
+knitr::read_chunk(here::here(.FILEPATHS$build$dataset))
+knitr::read_chunk(here::here(.FILEPATHS$build$report))
+knitr::read_chunk(here::here(.FILEPATHS$analysis$.))
+knitr::read_chunk(here::here(.FILEPATHS$analysis$setup))
+knitr::read_chunk(here::here(.FILEPATHS$analysis$eda))
+knitr::read_chunk(here::here(.FILEPATHS$analysis$model))
+knitr::read_chunk(here::here(.FILEPATHS$analysis$metrics))
+knitr::read_chunk(here::here(.FILEPATHS$analysis$validation))
+
+## ---- Utility Functions ----
+
+#' Use relative path to source an
+#' external script in its entirety.
+#'
+#' @param path Relative path to file.
+#' @param ... Additional parameters passed to the `source` call.
+#' @param verbose Print messages to stderr.
+import.source <- function(path, ..., verbose = .VERBOSE) {
+  if (verbose) { message(sprintf("Sourcing external script: '%s'...", basename(path))) }
+  source(here::here(path), ..., echo = .VERBOSE)
+}
+```
+
+```{r def-utils}
+```
+
+```{r def-packages}
+```
+
+```{r def-build}
+```
+
+```{r def-build-dataset}
+```
+
+```{r def-build-report}
+```
+
+```{r def-analysis-setup}
+```
+
+```{r def-analysis-eda}
+```
+
+```{r def-analysis-model}
+```
+
+```{r def-analysis-metrics}
+```
+
+```{r def-analysis-validation}
+```
+
+```{r def-analysis-exec}
+```
+
+```{r import-sources}
+## ---- Source (R/utils.R) ----
+source.utils(local = FALSE, force = TRUE, verbose = .VERBOSE)
+install.deps(file = "requirements.txt")
+
+## ---- Source (R/packages.R) ----
+require.deps()
+attach.deps()
+```
+
+<!-- This section provides an overview of the report -->
+
+In this assignment we will:
+
+- Perform exploratory data analysis (*EDA*) on the dataset.
+- Fit and analyze a linear discriminant analysis (*LDA*) model on the dataset.
+- Perform multiple cross-validation tasks at different $k$-fold values ($k=3,\,k=10$).
+
+## ELT
+
+Much of the *extract*, *load*, and *transform* (*ELT*) process from the previous report has been revised for this assignment. Notably, a `make.dataset()` function streamlines the process of parsing the source `Liver.txt` file into a compatible `data.frame`.
+
+<!-- PAGE BREAK -->
+\newpage
+
+## Session Information
+
+*This document was generated from an [R Markdown](http://rmarkdown.rstudio.com) Notebook (See the `vignettes/HW3_report.Rmd` in the project's sub-directory). The setup chunk for this document sets the root directory to the project root directory using the `here` package; all file paths are relative to the project root.*
+
+```{r session-info, echo=FALSE}
+sessionInfo()
+```

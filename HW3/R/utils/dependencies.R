@@ -5,7 +5,7 @@
 # Source the printf utility.
 source(here::here("R/utils/printf.R"))
 
-#' Write dependencies out from renv.
+# Write dependencies out from renv.
 write.deps <- function(file = "requirements.txt") {
   file_path <- here::here(file)
   deps <- renv::dependencies()[,"Package"]
@@ -13,7 +13,7 @@ write.deps <- function(file = "requirements.txt") {
   deps <- unique(deps)
   deps <- sort(deps, decreasing = FALSE)
   if (length(deps) > 0) {
-    printf("Writing project dependencies to '%s': ", file_path)
+    messagef("Writing project dependencies to '%s': ", basename(file_path))
     conn <- file(file_path, blocking = TRUE)
     on.exit(close(conn))
     writeLines(deps, conn)
@@ -34,18 +34,21 @@ read.deps <- function(file = "requirements.txt") {
   }
 
   # Parse dependencies.
-  pkgs <- deps[!(deps %in% installed.packages()[, "Package"])]
-  return(pkgs)
+  if (!is.na(deps) && length(deps) > 0) {
+    pkgs <- deps[!(deps %in% installed.packages()[, "Package"])]
+    return(pkgs)
+  }
+  return(NULL)
 }
 
 #' Install required packages.
 install.deps <- function(file = "requirements.txt") {
   if (renv::status()$synchronized == FALSE) {
-    print("Installing dependencies...")
+    message("Installing dependencies...")
     pkgs <- read.deps(file)
-    if(length(pkgs) > 0) {
-      print("Installing packages...")
-      install.packages(pkgs, dep=TRUE)
+    if (length(pkgs) > 0) {
+      message("Installing packages...")
+      install.packages(pkgs, dep = TRUE)
     }
     renv::restore()
   }
