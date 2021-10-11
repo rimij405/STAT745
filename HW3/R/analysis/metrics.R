@@ -101,7 +101,9 @@ calc.optimal.error.rates <- function(probabilities, truth) {
   # Return list.
   return(list(
     errors = errs,
-    thresholds = thresholds
+    thresholds = thresholds,
+    probabilities = probabilities,
+    truth = truth
   ))
 }
 
@@ -201,32 +203,30 @@ plot.optimal.error.rates <- function(errors, thresholds, ..., limit = 1.0, digit
       legend.key = element_blank()
     )
 
-  # Label the y-axis.
-  # Label the x-axis.
-  # Label the plot.
-
-  # Draw a horizontal reference line.
-
-  # Draw a vertical reference line.
-
-  # Add legend.
-
   # Return the optimal index.
   return(p)
 }
 
 #' Calculate the optimal classification.
 #'
-#' @param probabilities Predicted probabilities for the positive class.
-#' @param truth Ground truth class labels.
+#' @param .results Results from the optimal error rate calculations.
+#' @param limit Error limit.
+#' @param true Label to give the positive class.
+#' @param false Label to give the negative class.
 #'
 #' @return Classfication table.
-make.optimal.confusion.mat <- function(probabilities, truth, ..., limit = 1.0, true = TRUE, false = FALSE) {
+make.optimal.confusion.mat <- function(.results, ..., limit = 1.0, true = TRUE, false = FALSE) {
 
   # Get the errors and thresholds.
-  res <- calc.optimal.error.rates(probabilities, truth)
-  errors <- res$errors
-  thresholds <- res$thresholds
+  # @param probabilities Predicted probabilities for the positive class.
+  # @param truth Ground truth class labels.
+  # .results <- calc.optimal.error.rates(probabilities, truth)
+
+  # Get the results values.
+  errors <- .results$errors
+  thresholds <- .results$thresholds
+  probabilities <- .results$probabilities
+  truth <- .results$truth
 
   # Conditional.
   total_errors_limit <- (errors[, 3] < limit)

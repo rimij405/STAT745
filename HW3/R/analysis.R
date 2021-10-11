@@ -3,7 +3,7 @@
 # Perform EDA on the Liver dataset.
 
 # Source the utility functions.
-source(here::here("R/utils.R"))
+source(here::here("R/packages.R"))
 
 ## ---- analysis-setup ----
 
@@ -80,8 +80,10 @@ liver.analysis <- function(..., log = TRUE) {
   ## ---- exec-classifier ----
 
   # Fit a logistic regression model.
-  liver_fit <- liver %>%
+  liver_mod <- liver %>%
     fit.model(algorithm = glm, formula = severity ~ ., family = "binomial")
+  liver_fit <- liver_mod$obj
+  liver_fit$call <- liver_mod$expr
   print(liver_fit)
 
   # Get the summary.
@@ -113,12 +115,33 @@ liver.analysis <- function(..., log = TRUE) {
   # Show the plot.
 
   # Find the optimal error table.
-  liver_optimal_table <- make.optimal.confusion.mat(liver_fit$fitted.values, truth, true = "Severe", false = "Not Severe")
+  liver_optimal_table <- make.optimal.confusion.mat(liver_optimal_errors, true = "Severe", false = "Not Severe")
   print(liver_optimal_table)
 
   # Find the cross validation rates.
-  liver_cv_errors <- calc.cv.error.rates(liver, truth, glm, formula = severity ~ ., k = 10, m = 100, rounds = 100)
-  print(liver_cv_errors)
+  liver_10cv_errors <- calc.cv.error.rates(
+    liver, truth,
+    glm, formula = severity ~ ., family = "binomial",
+    k = 10, rounds = 100, m = 100)
+  print(liver_10cv_errors)
+
+  # Plot the cross validation error rates.
+  liver_10cv_plot <- plot.cv.error.rates(
+    liver_10cv_errors$errors,
+    liver_10cv_errors$thresholds
+  )
+  print(liver_10cv_plot$plot)
+
+  # Find the cross validation error table.
+  liver_10cv_table <- make.cv.confusion.mat(
+    liver, truth,
+    glm, formula = severity ~ ., family = "binomial",
+    k = 10, rounds = 10,
+    threshold = liver_10cv_plot$optimal_threshold)
+
+  # Summarize the matrices of tables:
+  liver_10cv_table_summary <- liver_10cv_table %>% summarize.cv.confusion.mat()
+  print(liver_10cv_table_summary)
 
   # End logging.
   end.log()

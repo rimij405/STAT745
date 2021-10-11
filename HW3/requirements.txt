@@ -8,4 +8,5 @@ magrittr
 readr
 renv
 rmarkdown
+tidyr
 tools

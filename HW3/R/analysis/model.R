@@ -12,7 +12,7 @@
 #' @return Fit model object.
 fit.model <- function(.data, algorithm, formula = Y ~ ., ...) {
 
-  print("Fitting model on the dataset...")
+  # print("Fitting model on the dataset...")
   model_opts <- list(formula = formula, data = .data, ...)
   model_obj <- do.call(algorithm, args = model_opts)
   # Equivalent: model_obj <- rlang::exec(quote(algorithm), !!!model_opts)
@@ -22,8 +22,11 @@ fit.model <- function(.data, algorithm, formula = Y ~ ., ...) {
   model_expr <- gsub("\"", "'", model_expr)
   model_expr <- gsub("", "", model_expr)
   # print(model_expr)
-  model_obj$call <- model_expr
-  return(model_obj)
+  # model_obj$call <- model_expr
+  return(list(
+    obj = model_obj,
+    expr = model_expr
+  ))
 
 }
 
