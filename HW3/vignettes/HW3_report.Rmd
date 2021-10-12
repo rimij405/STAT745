@@ -43,8 +43,7 @@ toccolor: blue
 
 ## Overview
 
-```{r setup, echo=FALSE, include=FALSE, results='hold'}
-#| include = TRUE, echo = TRUE, message = TRUE, warning = TRUE, error = TRUE
+```{r setup, echo=FALSE, include=FALSE, results='hide'}
 
 # Comments that begin with '## ----' can be used
 # to separate content. R Studio provides them as 
@@ -52,6 +51,7 @@ toccolor: blue
 
 ## ---- Hidden Variables ----
 .VERBOSE   <- TRUE
+.TARGET <- "Liver"
 .FILEPATHS <- list(
   utils      = list(
       .            = "R/utils.R",
@@ -93,13 +93,13 @@ knitr::opts_chunk$set(
   fig.keep    = 'all',
   fig.align   = 'center',
   fig.width   = 8,
-  fig.height  = 6,
+  fig.height  = 8,
   dpi         = 600,
   
   ## ---- Options (Formatting) ----
   results     = 'hold',
   collapse    = FALSE,
-  strip.white = FALSE,  # Remove blank lines at beginning and end of the source code block output.
+  strip.white = FALSE,  # Remove blank lines in output.
   tidy        = FALSE,
   size        = 'tiny',
   R.options   = list(width = 60),
@@ -107,21 +107,9 @@ knitr::opts_chunk$set(
   ## ---- Options (Display) ----
   include     = TRUE,
   echo        = TRUE,   
-  message     = TRUE,
-  warning     = TRUE
+  message     = FALSE,
+  warning     = FALSE
 )
-
-knitr::read_chunk(here::here(.FILEPATHS$utils$.))
-knitr::read_chunk(here::here(.FILEPATHS$packages))
-knitr::read_chunk(here::here(.FILEPATHS$build$.))
-knitr::read_chunk(here::here(.FILEPATHS$build$dataset))
-knitr::read_chunk(here::here(.FILEPATHS$build$report))
-knitr::read_chunk(here::here(.FILEPATHS$analysis$.))
-knitr::read_chunk(here::here(.FILEPATHS$analysis$setup))
-knitr::read_chunk(here::here(.FILEPATHS$analysis$eda))
-knitr::read_chunk(here::here(.FILEPATHS$analysis$model))
-knitr::read_chunk(here::here(.FILEPATHS$analysis$metrics))
-knitr::read_chunk(here::here(.FILEPATHS$analysis$validation))
 
 ## ---- Utility Functions ----
 
@@ -137,47 +125,15 @@ import.source <- function(path, ..., verbose = .VERBOSE) {
 }
 ```
 
-```{r def-utils}
-```
-
-```{r def-packages}
-```
-
-```{r def-build}
-```
-
-```{r def-build-dataset}
-```
-
-```{r def-build-report}
-```
-
-```{r def-analysis-setup}
-```
-
-```{r def-analysis-eda}
-```
-
-```{r def-analysis-model}
-```
-
-```{r def-analysis-metrics}
-```
-
-```{r def-analysis-validation}
-```
-
-```{r def-analysis-exec}
-```
-
-```{r import-sources}
-## ---- Source (R/utils.R) ----
-source.utils(local = FALSE, force = TRUE, verbose = .VERBOSE)
-install.deps(file = "requirements.txt")
-
+```{r import-packages, include=FALSE, echo=FALSE, message=FALSE}
 ## ---- Source (R/packages.R) ----
-require.deps()
-attach.deps()
+import.source(.FILEPATHS$packages)
+```
+
+
+```{r import-analysis, include=FALSE, echo=FALSE, message=FALSE}
+## ---- Source (R/analysis.R) ----
+import.source(.FILEPATHS$analysis$.)
 ```
 
 <!-- This section provides an overview of the report -->
@@ -190,7 +146,153 @@ In this assignment we will:
 
 ## ELT
 
-Much of the *extract*, *load*, and *transform* (*ELT*) process from the previous report has been revised for this assignment. Notably, a `make.dataset()` function streamlines the process of parsing the source `Liver.txt` file into a compatible `data.frame`.
+*Much of the __extract__, __load__, and __transform__ (__ELT__) process from the previous report has been revised for this assignment. Notably, a `make.dataset()` function streamlines the process of parsing the source `Liver.txt` file into a compatible `data.frame`.*
+
+```{r analysis-setup, echo=TRUE, message=TRUE}
+# Import the dataset as variable called "Liver".
+setup.analysis(target = "Liver")
+```
+
+The `setup.analysis()` function imports a dataset into the global environment with the name provided to the `target =` argument.
+
+## EDA {.tabset}
+
+*This section reviews the `Liver` dataset. In an improvement over the previous report, it now incorporates an assessment of feature correlations.*
+
+### Response Encoding
+
+```{r analysis-eda-recode}
+# Recode the response.
+liver <- Liver %>% make.response()
+summary(liver)
+```
+
+```{r analysis-eda-truth, echo=1, results='hide'}
+truth <- (liver$severity == "Severe")
+summary(truth)
+```
+
+<!-- PAGE BREAK -->
+\newpage
+
+### Feature Correlations
+
+```{r analysis-eda-summary, eval=FALSE, echo=TRUE}
+liver.info <- analysis.eda(Liver, truth)
+summary(liver.info)
+```
+
+```{r analysis-eda-summary-presentation, echo=FALSE, results='hold'}
+liver.info <- analysis.eda(Liver, truth)
+print(unlist(liver.info$shape, use.names = TRUE))
+println("Label counts: ");
+print(unlist(liver.info$n_labels, use.names = TRUE))
+println("Class prior probabilities: ");
+options(digits = 4)
+print(unlist(liver.info$p_labels, use.names = TRUE))
+```
+```{r analysis-eda-corrplot}
+# Plot using corrplot::corrplot wrapper.
+liver.corrplot <- corr.plot(
+  liver, sig.level = 0.05, insig = "blank",
+  title = "Correlation Plot",
+  mar = c(1,1,2,1)
+)
+```
+
+The data behind the above correlation plot is provided below:
+
+```{r analysis-eda-correlation, echo=FALSE, results='hold'}
+println("Feature correlation matrix: ")
+print(liver.corrplot$corr)
+```
+### Baseline Model Analysis
+
+```{r analysis-glm-baseline, results='hide'}
+# TODO: Replace glm with lda model.
+liver.baseline <- analysis.clf(
+  liver, truth,
+  algorithm = glm,
+  params = list(
+    formula = severity ~ .,
+    family = "binomial"
+  ),
+  pos = "Severe", neg = "Not Severe"
+)
+```
+```{r analysis-glm-baseline-summary, echo=FALSE}
+println("Summary of baseline model: "); 
+print(liver.baseline$summary)
+```
+
+```{r analysis-glm-baseline-error, echo=FALSE}
+println("Baseline classification table: ")
+print(unlist(list(
+  "Baseline model error rate:" = liver.baseline$error
+)))
+print(liver.baseline$table)
+```
+```{r analysis-glm-optimal-error, fig.width=10, fig.size=8, echo=FALSE}
+print(liver.baseline$plot)
+println("Misclassification table using optimal threshold: ")
+summary(liver.baseline$optimal_table)
+print(liver.baseline$optimal_table)
+```
+
+<!-- PAGE BREAK -->
+\newpage
+
+## Cross-Validation Analysis {.tabset}
+
+### 10-fold CV
+
+```{r analysis-glm-10cv, fig.width=10, fig.size=8, echo=FALSE}
+liver.k10CV <- analysis.cv(
+  liver, truth,
+  params = list(
+    formula = severity ~ .,
+    family = "binomial"
+  ),
+  k = 10, rounds = 100, m = 100
+)
+summary(liver.k10CV)
+```
+
+```{r analysis-glm-10cv-plot, fig.width=10, fig.size=8, echo=FALSE}
+print(liver.k10CV$plot)
+```
+
+```{r analysis-glm-10cv-summary, fig.width=10, fig.size=8, echo=FALSE}
+printf("Optimal threshold: %s", liver.k10CV$optimal_threshold)
+print(liver.k10CV$confusion_mat_summary)
+```
+
+
+
+<!-- PAGE BREAK -->
+\newpage
+
+### 3-fold CV
+
+```{r analysis-glm-3cv, fig.width=10, fig.size=8, echo=FALSE}
+liver.k3CV <- analysis.cv(
+  liver, truth,
+  params = list(
+    formula = severity ~ .,
+    family = "binomial"
+  ),
+  k = 3, rounds = 100, m = 100
+)
+summary(liver.k3CV)
+```
+```{r analysis-glm-3cv-plot, fig.width=10, fig.size=8, echo=FALSE}
+print(liver.k3CV$plot)
+```
+
+```{r analysis-glm-3cv-summary, fig.width=10, fig.size=8, echo=FALSE}
+printf("Optimal threshold: %s", liver.k3CV$optimal_threshold)
+print(liver.k3CV$confusion_mat_summary)
+```
 
 <!-- PAGE BREAK -->
 \newpage
@@ -199,6 +301,6 @@ Much of the *extract*, *load*, and *transform* (*ELT*) process from the previous
 
 *This document was generated from an [R Markdown](http://rmarkdown.rstudio.com) Notebook (See the `vignettes/HW3_report.Rmd` in the project's sub-directory). The setup chunk for this document sets the root directory to the project root directory using the `here` package; all file paths are relative to the project root.*
 
-```{r session-info, echo=FALSE}
+```{r session-info, echo=FALSE, message=FALSE}
 sessionInfo()
 ```

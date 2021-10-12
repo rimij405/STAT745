@@ -2,10 +2,18 @@
 #
 # Setup the analysis.
 
+## ---- analysis::setup::constants ----
+
+.DEFAULT_TARGET = "Liver"
+
+## ---- analysis::setup::imports ----
+
 # Source the build functions.
+source(here::here("R/utils.R"))
+source.submodule(file = UTILS$printf)
 source(here::here("R/build.R"))
 
-## ---- def-analysis-setup ----
+## ---- analysis::setup::exports ----
 
 #' Setup the analysis.
 #'
@@ -13,16 +21,18 @@ source(here::here("R/build.R"))
 #' @param cache Should we skip making the dataset if it already exists?
 #'
 #' @return Reference to the loaded data.
-setup.analysis <- function(target = "liver", cache = TRUE) {
+setup.analysis <- function(target = .DEFAULT_TARGET, cache = TRUE) {
   # Setup the analysis.
-  printf("Use cached dataset? %s", cache)
+  messagef("Use cached dataset? %s", cache)
   if (!cache) { clean.dataset(target = target) }
   make.dataset(target = target, cache = cache)
   df <- get(target)
-  printf("Use '%s' to access underlying tbl_df.", target)
-  printf("Dataset of type: '%s'.", paste(class(df), collapse = "/"))
+  messagef("Use '%s' to access underlying tbl_df.", target)
+  messagef("Dataset of type: '%s'.", paste(class(df), collapse = "/"))
   return(df)
 }
+
+## ---- analysis::setup::helpers ----
 
 setup.log <- function(file = "HW3_analysis.log", ..., output_dir = "log") {
   # Create directory.
@@ -37,9 +47,7 @@ setup.log <- function(file = "HW3_analysis.log", ..., output_dir = "log") {
 }
 
 start.log <- function() {
-  cat("\n=====================================================\n")
-  cat(sprintf("LOGGING FROM [%s] %s\n", Sys.time(), Sys.Date()))
-  cat(  "=====================================================\n\n")
+  println.section(sprintf("LOGGING FROM [%s] %s\n", Sys.time(), Sys.Date()))
 }
 
 write.log <- function(message) {

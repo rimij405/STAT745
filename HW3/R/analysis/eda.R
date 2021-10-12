@@ -2,7 +2,24 @@
 #
 # Handle EDA of the liver dataset.
 
-## ---- def-analysis-eda ----
+## ---- analysis::eda::constants ----
+
+.OUTPUT <- list(
+  corrplot = list(
+    . = "HW3_corrplot.png",
+    output_dir = "figures",
+    device = png,
+    device_opts = list(
+      units = "in",
+      width = 8,
+      height = 8,
+      res = 600
+    ),
+    show = FALSE
+  )
+)
+
+## ---- analysis::eda::exports ----
 
 #' Recode the response factors.
 #'
@@ -40,7 +57,6 @@ make.shape <- function(.data) {
   return(shape)
 }
 
-
 summarize.features <- function(.data, ..., d = ncol(.data)) {
   s <- summary(.data[,-d])
   return(s)
@@ -56,27 +72,34 @@ corr.features <- function(.data, ..., d = ncol(.data)) {
 }
 
 corr.plot <- function(.data,
-                      output_name = "HW3_corrplot.png",
+                      output_name = .OUTPUT$corrplot$.,
                       ...,
                       d = ncol(.data),
-                      output_dir = "figures",
-                      device = png,
-                      device_opts = list()) {
-  # Create directory. .../figures/
-  file_path <- here::here(output_dir)
-  if (!dir.exists(file_path)) {
-    dir.create(file_path, recursive = TRUE)
-  }
+                      export = .OUTPUT$corrplot$show,
+                      output_dir = .OUTPUT$corrplot$output_dir,
+                      device = .OUTPUT$corrplot$device,
+                      device_opts = .OUTPUT$corrplot$device_opts) {
 
-  # Get file name. .../figures/HW3_corrplot.png
-  output_file <- file.path(output_dir, output_name)
+  # Default output.
+  output_file <- stdout()
 
   # Open the device.
-  do.call(device, c(
-    output_file,
-    device_opts
-  ))
-  on.exit(dev.off())
+  if (export) {
+    # Create directory. .../figures/
+    file_path <- here::here(output_dir)
+    if (!dir.exists(file_path)) {
+      dir.create(file_path, recursive = TRUE)
+    }
+
+    # Get file name. .../figures/HW3_corrplot.png
+    output_file <- file.path(output_dir, output_name)
+
+    do.call(device, c(
+      output_file,
+      device_opts
+    ))
+    on.exit(dev.off())
+  }
 
   # Get the correlation data
   data.corr <- .data %>% corr.features(d = d)

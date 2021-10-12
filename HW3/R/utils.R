@@ -2,54 +2,79 @@
 #
 # Common utility functions.
 
-## ---- def-utils ----
+## ---- utils::constants ----
 
+# Collection of submodules that will be imported.
 UTILS <- list(
+    . = here::here("R/utils.R"),
     printf = here::here("R/utils/printf.R"),
-    paths = here::here("R/utils/paths.R"),
-    dependencies = here::here("R/utils/dependencies.R")
+    paths = here::here("R/utils/paths.R")
 )
 
-#' Source the additional utilities.
-source.utils <- function(files = names(UTILS), ..., local = FALSE, force = FALSE, verbose = FALSE) {
-  # Calculate the current md5.
-  current_utils <- as.vector(files)
+.get.cached.modules <- function() {
+  if (exists("CACHED_MODULES", envir = .GlobalEnv)) {
+    # Read from globals.
+    CACHED_MODULES <- get("CACHED_MODULES", envir = .GlobalEnv)
+  } else {
+    # Default.
+    CACHED_MODULES <- list(UTILS$.)
+  }
+  return(CACHED_MODULES)
+}
 
-  # Load the previous md5.
-  previous_utils <- as.vector(0)
+.set.cached.modules <- function(items) {
+  items <- basename(unlist(items, use.names = TRUE))
+  assign("CACHED_MODULES", value = as.list(unique(items)), envir = .GlobalEnv)
+}
 
-  # If cache exists, grab it.
-  if (exists("utils_cached", envir = .GlobalEnv)) {
-    previous_utils <- get("utils_cached", envir = .GlobalEnv)
+.find.cached.modules <- function(files, current_cache = .get.cached.modules()) {
+  a <- basename(unlist(current_cache, use.names = TRUE))
+  b <- basename(unlist(files, use.names = TRUE))
+  return(b %in% a)
+}
+
+## ---- utils::exports ----
+
+#' Source submodule.
+#'
+#' @param files List of submodule scripts to source.
+#' @param ... Arguments passed to the `source()` call.
+#' @param verbose Echo source contents?
+#'
+#' @export
+source.submodule <- function(files = UTILS, ..., verbose = FALSE, use_cache = TRUE, dry = FALSE) {
+
+  # Current cache initialized as empty list.
+  current_cache <- list()
+
+  # If using cache, we'll grab it from the options.
+  if (use_cache) {
+    # Only get stored cache if use_cache = TRUE.
+    current_cache <- .get.cached.modules()
+    if (length(current_cache) > 0) {
+      # Only prepare missing files.
+      files <- files[!(.find.cached.modules(files, current_cache))]
+    }
+    current_cache <- c(files, current_cache, list())
   }
 
-  # Determine if dirty.
-  is_dirty <- (length(previous_utils) == 0
-               || !all(current_utils %in% previous_utils))
+  # Update the cache.
+  .set.cached.modules(current_cache)
 
-  # Update the cached value.
-  cached_utils <- unique(c(current_utils, previous_utils))
-  cached_utils <- cached_utils[cached_utils != 0]
-  assign("utils_cached", cached_utils, envir = .GlobalEnv)
-
-  # Update the skip flag.
-  # - Always skip if dirty == TRUE
-  # - Always skip if force == TRUE
-  skip <- !is_dirty && !force
-
-  if (!skip) {
-    if (is.na(files) || length(files) == 0) {
-      message("No utility functions to load.")
-    } else {
-      if (verbose) { message(sprintf("Loading %s utilit(y/ies)...", length(files))) }
-      for (i in 1:length(files)) {
-        file <- files[i]
-        path <- get(file, UTILS)
-        if (verbose) { message(sprintf("Loading utility: '%s'", file)) }
-        source(path, local = local)
+  # Source the missing utilities.
+  if (!is.na(files) && length(files) > 0) {
+    for (i in 1:length(files)) {
+      file <- here::here(files[i])
+      if (!dry) {
+        message(sprintf("Sourcing external script [%s]...", basename(file)))
+        source(file = file, ..., echo = verbose)
+      }
+      else {
+        message(sprintf("Dry run. Skipping [%s]...", basename(file)))
       }
     }
-  } else if (verbose) {
-    message("Utilities already loaded.")
+    message(sprintf("Done! Sourced %s file(s).", length(files)))
+  } else {
+    message("No sourced files to import!")
   }
 }

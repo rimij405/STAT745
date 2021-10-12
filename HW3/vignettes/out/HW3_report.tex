@@ -1,16 +1,28 @@
 % Options for packages loaded elsewhere
 \PassOptionsToPackage{unicode}{hyperref}
 \PassOptionsToPackage{hyphens}{url}
-\PassOptionsToPackage{dvipsnames,svgnames*,x11names*}{xcolor}
+\PassOptionsToPackage{dvipsnames,svgnames,x11names}{xcolor}
 %
 \documentclass[
   11pt,
   a4paper,
 ]{scrartcl}
+\title{Homework 3 Report}
+\usepackage{etoolbox}
+\makeatletter
+\providecommand{\subtitle}[1]{% add subtitle to \maketitle
+  \apptocmd{\@title}{\par {\large #1 \par}}{}{}
+}
+\makeatother
+\subtitle{Classification of liver malfunction severity (LDA)}
+\author{Ian Effendi \textbackslash{}
+\href{mailto:iae2784@rit.edu}{\nolinkurl{iae2784@rit.edu}}}
+\date{October 12, 2021}
+
 \usepackage{amsmath,amssymb}
 \usepackage{lmodern}
-\usepackage{ifxetex,ifluatex}
-\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+\usepackage{iftex}
+\ifPDFTeX
   \usepackage[T1]{fontenc}
   \usepackage[utf8]{inputenc}
   \usepackage{textcomp} % provide euro and other symbols
@@ -42,10 +54,10 @@
   pdftitle={Homework 3 Report},
   pdfauthor={Ian Effendi \textbackslash{} iae2784@rit.edu},
   colorlinks=true,
-  linkcolor=Maroon,
-  filecolor=Maroon,
-  citecolor=Blue,
-  urlcolor=violet,
+  linkcolor={Maroon},
+  filecolor={Maroon},
+  citecolor={Blue},
+  urlcolor={violet},
   pdfcreator={LaTeX via pandoc}}
 \urlstyle{same} % disable monospaced font for URLs
 \usepackage[margin=1in,heightrounded]{geometry}
@@ -89,6 +101,16 @@
 \newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
 \newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
 \newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\usepackage{longtable,booktabs,array}
+\usepackage{calc} % for calculating minipage widths
+% Correct order of tables after \paragraph or \subparagraph
+\usepackage{etoolbox}
+\makeatletter
+\patchcmd\longtable{\par}{\if@noskipsec\mbox{}\fi\par}{}{}
+\makeatother
+% Allow footnotes in longtable head/foot
+\IfFileExists{footnotehyper.sty}{\usepackage{footnotehyper}}{\usepackage{footnote}}
+\makesavenoteenv{longtable}
 \usepackage{graphicx}
 \makeatletter
 \def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
@@ -106,21 +128,9 @@
 \providecommand{\tightlist}{%
   \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
 \setcounter{secnumdepth}{-\maxdimen} % remove section numbering
-\ifluatex
+\ifLuaTeX
   \usepackage{selnolig}  % disable illegal ligatures
 \fi
-
-\title{Homework 3 Report}
-\usepackage{etoolbox}
-\makeatletter
-\providecommand{\subtitle}[1]{% add subtitle to \maketitle
-  \apptocmd{\@title}{\par {\large #1 \par}}{}{}
-}
-\makeatother
-\subtitle{Classification of liver malfunction severity (LDA)}
-\author{Ian Effendi \textbackslash{}
-\href{mailto:iae2784@rit.edu}{\nolinkurl{iae2784@rit.edu}}}
-\date{October 11, 2021}
 
 \begin{document}
 \maketitle
@@ -142,192 +152,6 @@ Trevor Hastie, Robert Tibshirani.
 \hypertarget{overview}{%
 \subsection{Overview}\label{overview}}
 
-\begin{Shaded}
-\begin{Highlighting}[]
-\CommentTok{\# Comments that begin with \textquotesingle{}\#\# {-}{-}{-}{-}\textquotesingle{} can be used}
-\CommentTok{\# to separate content. R Studio provides them as }
-\CommentTok{\# little bookmarks that you can use.}
-
-\DocumentationTok{\#\# {-}{-}{-}{-} Hidden Variables {-}{-}{-}{-}}
-\NormalTok{.VERBOSE }\OtherTok{=} \ConstantTok{TRUE}
-\NormalTok{.FILEPATHS }\OtherTok{=} \FunctionTok{list}\NormalTok{(}
-  \AttributeTok{utils      =} \FunctionTok{list}\NormalTok{(}
-      \AttributeTok{.            =} \StringTok{"R/utils.R"}\NormalTok{,}
-      \AttributeTok{dependencies =} \StringTok{"R/utils/dependencies.R"}\NormalTok{,}
-      \AttributeTok{paths        =} \StringTok{"R/utils/paths.R"}\NormalTok{,}
-      \AttributeTok{printf       =} \StringTok{"R/utils/printf.R"}
-\NormalTok{  ),}
-  \AttributeTok{packages   =} \StringTok{"R/packages.R"}\NormalTok{,}
-  \AttributeTok{build      =} \FunctionTok{list}\NormalTok{(}
-      \AttributeTok{.            =} \StringTok{"R/build.R"}\NormalTok{,}
-      \AttributeTok{dataset      =} \StringTok{"R/build/dataset.R"}\NormalTok{,}
-      \AttributeTok{report       =} \StringTok{"R/build/report.R"}
-\NormalTok{  ),}
-  \AttributeTok{analysis   =} \FunctionTok{list}\NormalTok{(}
-      \AttributeTok{.            =} \StringTok{"R/analysis.R"}\NormalTok{,}
-      \AttributeTok{setup        =} \StringTok{"R/analysis/setup.R"}\NormalTok{,}
-      \AttributeTok{eda          =} \StringTok{"R/analysis/eda.R"}\NormalTok{,}
-      \AttributeTok{model        =} \StringTok{"R/analysis/model.R"}\NormalTok{,}
-      \AttributeTok{metrics      =} \StringTok{"R/analysis/metrics.R"}\NormalTok{,}
-      \AttributeTok{validation   =} \StringTok{"R/analysis/validation.R"}
-\NormalTok{  )}
-\NormalTok{)}
-
-\DocumentationTok{\#\# {-}{-}{-}{-} Default Settings (Knit) {-}{-}{-}{-}}
-\NormalTok{knitr}\SpecialCharTok{::}\NormalTok{opts\_knit}\SpecialCharTok{$}\FunctionTok{set}\NormalTok{( }
-  \AttributeTok{root.dir =}\NormalTok{ here}\SpecialCharTok{::}\FunctionTok{here}\NormalTok{()}
-\NormalTok{)}
-
-\DocumentationTok{\#\# {-}{-}{-}{-} Default Settings (Chunk) {-}{-}{-}{-}}
-\NormalTok{knitr}\SpecialCharTok{::}\NormalTok{opts\_chunk}\SpecialCharTok{$}\FunctionTok{set}\NormalTok{(}
-  
-  \DocumentationTok{\#\# {-}{-}{-}{-} Options (Execution) {-}{-}{-}{-}}
-  \AttributeTok{eval        =} \ConstantTok{TRUE}\NormalTok{,   }\CommentTok{\# By default, turn off chunk evaluation.}
-  \AttributeTok{cache       =} \ConstantTok{FALSE}\NormalTok{,  }\CommentTok{\# By default, cache all chunk results.}
-  \AttributeTok{error       =} \ConstantTok{FALSE}\NormalTok{,   }\CommentTok{\# Stop R when an error is raised.}
-  
-  \DocumentationTok{\#\# {-}{-}{-}{-} Options (Figure) {-}{-}{-}{-}}
-  \AttributeTok{fig.path    =} \StringTok{\textquotesingle{}figure/\textquotesingle{}}\NormalTok{,}
-  \AttributeTok{fig.keep    =} \StringTok{\textquotesingle{}all\textquotesingle{}}\NormalTok{,}
-  \AttributeTok{fig.align   =} \StringTok{\textquotesingle{}center\textquotesingle{}}\NormalTok{,}
-  \AttributeTok{fig.width   =} \DecValTok{8}\NormalTok{,}
-  \AttributeTok{fig.height  =} \DecValTok{6}\NormalTok{,}
-  \AttributeTok{dpi         =} \DecValTok{600}\NormalTok{,}
-  
-  \DocumentationTok{\#\# {-}{-}{-}{-} Options (Formatting) {-}{-}{-}{-}}
-  \AttributeTok{results     =} \StringTok{\textquotesingle{}hold\textquotesingle{}}\NormalTok{,}
-  \AttributeTok{collapse    =} \ConstantTok{FALSE}\NormalTok{,}
-  \AttributeTok{strip.white =} \ConstantTok{FALSE}\NormalTok{,  }\CommentTok{\# Remove blank lines at beginning and end of the source code block output.}
-  \AttributeTok{tidy        =} \ConstantTok{FALSE}\NormalTok{,}
-  \AttributeTok{size        =} \StringTok{\textquotesingle{}tiny\textquotesingle{}}\NormalTok{,}
-  \AttributeTok{R.options   =} \FunctionTok{list}\NormalTok{(}\AttributeTok{width =} \DecValTok{60}\NormalTok{),}
-
-  \DocumentationTok{\#\# {-}{-}{-}{-} Options (Display) {-}{-}{-}{-}}
-  \AttributeTok{include     =} \ConstantTok{TRUE}\NormalTok{,}
-  \AttributeTok{echo        =} \ConstantTok{TRUE}\NormalTok{,   }
-  \AttributeTok{message     =} \ConstantTok{TRUE}\NormalTok{,}
-  \AttributeTok{warning     =} \ConstantTok{TRUE}
-\NormalTok{)}
-
-\DocumentationTok{\#\# {-}{-}{-}{-} Utility Functions {-}{-}{-}{-}}
-
-\CommentTok{\#\textquotesingle{} Use relative path to import all}
-\CommentTok{\#\textquotesingle{} chunks from an external script,}
-\CommentTok{\#\textquotesingle{} without executing the code inside}
-\CommentTok{\#\textquotesingle{} of the document.}
-\CommentTok{\#\textquotesingle{}}
-\CommentTok{\#\textquotesingle{} @param path Relative path to file.}
-\CommentTok{\#\textquotesingle{} @param ... Additional parameters passed to the \textasciigrave{}read\_chunk\textasciigrave{} call.}
-\CommentTok{\#\textquotesingle{} @param roxygen\_comments FALSE; should comments be stripped out from external code?}
-\CommentTok{\#\textquotesingle{} @param verbose Print messages to stderr.}
-\NormalTok{import.chunks }\OtherTok{\textless{}{-}} \ControlFlowTok{function}\NormalTok{(path, ..., }\AttributeTok{verbose =}\NormalTok{ .VERBOSE) \{}
-  \ControlFlowTok{if}\NormalTok{ (verbose) \{ }\FunctionTok{message}\NormalTok{(}\FunctionTok{sprintf}\NormalTok{(}\StringTok{"Importing chunks from external script: \textquotesingle{}\%s\textquotesingle{}..."}\NormalTok{, }\FunctionTok{basename}\NormalTok{(path))) \}}
-\NormalTok{  file }\OtherTok{=}\NormalTok{ here}\SpecialCharTok{::}\FunctionTok{here}\NormalTok{(path)}
-\NormalTok{  knitr}\SpecialCharTok{::}\FunctionTok{read\_chunk}\NormalTok{(file, ...)}
-\NormalTok{\}}
-
-\CommentTok{\#\textquotesingle{} Use relative path to source an}
-\CommentTok{\#\textquotesingle{} external script in its entirety.}
-\CommentTok{\#\textquotesingle{}}
-\CommentTok{\#\textquotesingle{} @param path Relative path to file.}
-\CommentTok{\#\textquotesingle{} @param ... Additional parameters passed to the \textasciigrave{}source\textasciigrave{} call.}
-\CommentTok{\#\textquotesingle{} @param verbose Print messages to stderr.}
-\NormalTok{import.source }\OtherTok{\textless{}{-}} \ControlFlowTok{function}\NormalTok{(path, ..., }\AttributeTok{verbose =}\NormalTok{ .VERBOSE) \{}
-  \ControlFlowTok{if}\NormalTok{ (verbose) \{ }\FunctionTok{message}\NormalTok{(}\FunctionTok{sprintf}\NormalTok{(}\StringTok{"Sourcing external script: \textquotesingle{}\%s\textquotesingle{}..."}\NormalTok{, }\FunctionTok{basename}\NormalTok{(path))) \}}
-  \FunctionTok{source}\NormalTok{(here}\SpecialCharTok{::}\FunctionTok{here}\NormalTok{(path), ..., }\AttributeTok{echo =}\NormalTok{ .VERBOSE)}
-\NormalTok{\}}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{Shaded}
-\begin{Highlighting}[]
-
-\DocumentationTok{\#\# {-}{-}{-}{-} Import (R/utils.R) {-}{-}{-}{-}}
-\FunctionTok{import.chunks}\NormalTok{(.FILEPATHS}\SpecialCharTok{$}\NormalTok{utils}\SpecialCharTok{$}\NormalTok{.)}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{verbatim}
-## Importing chunks from external script: 'utils.R'...
-\end{verbatim}
-
-\begin{Shaded}
-\begin{Highlighting}[]
-
-\DocumentationTok{\#\# {-}{-}{-}{-} Import (R/packages.R) {-}{-}{-}{-}}
-\FunctionTok{import.chunks}\NormalTok{(.FILEPATHS}\SpecialCharTok{$}\NormalTok{packages)}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{verbatim}
-## Importing chunks from external script: 'packages.R'...
-\end{verbatim}
-
-\begin{Shaded}
-\begin{Highlighting}[]
-
-\DocumentationTok{\#\# {-}{-}{-}{-} Import (R/build/*) {-}{-}{-}{-}}
-\FunctionTok{import.chunks}\NormalTok{(.FILEPATHS}\SpecialCharTok{$}\NormalTok{build}\SpecialCharTok{$}\NormalTok{dataset)}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{verbatim}
-## Importing chunks from external script: 'dataset.R'...
-\end{verbatim}
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\FunctionTok{import.chunks}\NormalTok{(.FILEPATHS}\SpecialCharTok{$}\NormalTok{build}\SpecialCharTok{$}\NormalTok{report)}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{verbatim}
-## Importing chunks from external script: 'report.R'...
-\end{verbatim}
-
-\begin{Shaded}
-\begin{Highlighting}[]
-
-\DocumentationTok{\#\# {-}{-}{-}{-} Import (R/analysis/*) {-}{-}{-}{-}}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{Shaded}
-\begin{Highlighting}[]
-
-\DocumentationTok{\#\# {-}{-}{-}{-} Source (R/utils.R) {-}{-}{-}{-}}
-\FunctionTok{source.utils}\NormalTok{(}\AttributeTok{local =} \ConstantTok{FALSE}\NormalTok{, }\AttributeTok{force =} \ConstantTok{TRUE}\NormalTok{, }\AttributeTok{verbose =}\NormalTok{ .VERBOSE)}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{verbatim}
-## Loading 3 utilit(y/ies)...
-\end{verbatim}
-
-\begin{verbatim}
-## Loading utility: 'printf'
-\end{verbatim}
-
-\begin{verbatim}
-## Loading utility: 'paths'
-\end{verbatim}
-
-\begin{verbatim}
-## Loading utility: 'dependencies'
-\end{verbatim}
-
-\begin{Shaded}
-\begin{Highlighting}[]
-
-\DocumentationTok{\#\# {-}{-}{-}{-} Source (R/packages.R) {-}{-}{-}{-}}
-\FunctionTok{install.deps}\NormalTok{(}\AttributeTok{file =} \StringTok{"requirements.txt"}\NormalTok{)}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{verbatim}
-## * The project is already synchronized with the lockfile.
-\end{verbatim}
-
 In this assignment we will:
 
 \begin{itemize}
@@ -345,11 +169,497 @@ In this assignment we will:
 \hypertarget{elt}{%
 \subsection{ELT}\label{elt}}
 
-Much of the \emph{extract}, \emph{load}, and \emph{transform}
-(\emph{ELT}) process from the previous report has been revised for this
-assignment. Notably, a \texttt{make.dataset()} function streamlines the
-process of parsing the source \texttt{Liver.txt} file into a compatible
-\texttt{data.frame}.
+\emph{Much of the \textbf{extract}, \textbf{load}, and
+\textbf{transform} (\textbf{ELT}) process from the previous report has
+been revised for this assignment. Notably, a \texttt{make.dataset()}
+function streamlines the process of parsing the source
+\texttt{Liver.txt} file into a compatible \texttt{data.frame}.}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Import the dataset as variable called "Liver".}
+\FunctionTok{setup.analysis}\NormalTok{(}\AttributeTok{target =} \StringTok{"Liver"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Use cached dataset? TRUE
+\end{verbatim}
+
+\begin{verbatim}
+## 'Liver' exists.
+\end{verbatim}
+
+\begin{verbatim}
+## Importing dataset...
+\end{verbatim}
+
+\begin{verbatim}
+## Parsing dataset from local file...
+\end{verbatim}
+
+\begin{verbatim}
+## Reading dataset from compressed cache file...
+\end{verbatim}
+
+\begin{verbatim}
+## Done.
+\end{verbatim}
+
+\begin{verbatim}
+## Dataset imported.
+\end{verbatim}
+
+\begin{verbatim}
+## Registered target dataset to global environment. Access using 'Liver'.
+\end{verbatim}
+
+\begin{verbatim}
+## Use 'Liver' to access underlying tbl_df.
+\end{verbatim}
+
+\begin{verbatim}
+## Dataset of type: 'tbl_df/tbl/data.frame'.
+\end{verbatim}
+
+\begin{longtable}[]{@{}rrrrrrl@{}}
+\toprule
+blood.1 & blood.2 & blood.3 & blood.4 & blood.5 & drinks & severity \\
+\midrule
+\endhead
+85 & 92 & 45 & 27 & 31 & 0.0 & 1 \\
+85 & 64 & 59 & 32 & 23 & 0.0 & 2 \\
+86 & 54 & 33 & 16 & 54 & 0.0 & 2 \\
+91 & 78 & 34 & 24 & 36 & 0.0 & 2 \\
+87 & 70 & 12 & 28 & 10 & 0.0 & 2 \\
+98 & 55 & 13 & 17 & 17 & 0.0 & 2 \\
+88 & 62 & 20 & 17 & 9 & 0.5 & 1 \\
+88 & 67 & 21 & 11 & 11 & 0.5 & 1 \\
+92 & 54 & 22 & 20 & 7 & 0.5 & 1 \\
+90 & 60 & 25 & 19 & 5 & 0.5 & 1 \\
+89 & 52 & 13 & 24 & 15 & 0.5 & 1 \\
+82 & 62 & 17 & 17 & 15 & 0.5 & 1 \\
+90 & 64 & 61 & 32 & 13 & 0.5 & 1 \\
+86 & 77 & 25 & 19 & 18 & 0.5 & 1 \\
+96 & 67 & 29 & 20 & 11 & 0.5 & 1 \\
+91 & 78 & 20 & 31 & 18 & 0.5 & 1 \\
+89 & 67 & 23 & 16 & 10 & 0.5 & 1 \\
+89 & 79 & 17 & 17 & 16 & 0.5 & 1 \\
+91 & 107 & 20 & 20 & 56 & 0.5 & 1 \\
+94 & 116 & 11 & 33 & 11 & 0.5 & 1 \\
+92 & 59 & 35 & 13 & 19 & 0.5 & 1 \\
+93 & 23 & 35 & 20 & 20 & 0.5 & 1 \\
+90 & 60 & 23 & 27 & 5 & 0.5 & 1 \\
+96 & 68 & 18 & 19 & 19 & 0.5 & 1 \\
+84 & 80 & 47 & 33 & 97 & 0.5 & 1 \\
+92 & 70 & 24 & 13 & 26 & 0.5 & 1 \\
+90 & 47 & 28 & 15 & 18 & 0.5 & 1 \\
+88 & 66 & 20 & 21 & 10 & 0.5 & 1 \\
+91 & 102 & 17 & 13 & 19 & 0.5 & 1 \\
+87 & 41 & 31 & 19 & 16 & 0.5 & 1 \\
+86 & 79 & 28 & 16 & 17 & 0.5 & 1 \\
+91 & 57 & 31 & 23 & 42 & 0.5 & 1 \\
+93 & 77 & 32 & 18 & 29 & 0.5 & 1 \\
+88 & 96 & 28 & 21 & 40 & 0.5 & 1 \\
+94 & 65 & 22 & 18 & 11 & 0.5 & 1 \\
+91 & 72 & 155 & 68 & 82 & 0.5 & 2 \\
+85 & 54 & 47 & 33 & 22 & 0.5 & 2 \\
+79 & 39 & 14 & 19 & 9 & 0.5 & 2 \\
+85 & 85 & 25 & 26 & 30 & 0.5 & 2 \\
+89 & 63 & 24 & 20 & 38 & 0.5 & 2 \\
+84 & 92 & 68 & 37 & 44 & 0.5 & 2 \\
+89 & 68 & 26 & 39 & 42 & 0.5 & 2 \\
+89 & 101 & 18 & 25 & 13 & 0.5 & 2 \\
+86 & 84 & 18 & 14 & 16 & 0.5 & 2 \\
+85 & 65 & 25 & 14 & 18 & 0.5 & 2 \\
+88 & 61 & 19 & 21 & 13 & 0.5 & 2 \\
+92 & 56 & 14 & 16 & 10 & 0.5 & 2 \\
+95 & 50 & 29 & 25 & 50 & 0.5 & 2 \\
+91 & 75 & 24 & 22 & 11 & 0.5 & 2 \\
+83 & 40 & 29 & 25 & 38 & 0.5 & 2 \\
+89 & 74 & 19 & 23 & 16 & 0.5 & 2 \\
+85 & 64 & 24 & 22 & 11 & 0.5 & 2 \\
+92 & 57 & 64 & 36 & 90 & 0.5 & 2 \\
+94 & 48 & 11 & 23 & 43 & 0.5 & 2 \\
+87 & 52 & 21 & 19 & 30 & 0.5 & 2 \\
+85 & 65 & 23 & 29 & 15 & 0.5 & 2 \\
+84 & 82 & 21 & 21 & 19 & 0.5 & 2 \\
+88 & 49 & 20 & 22 & 19 & 0.5 & 2 \\
+96 & 67 & 26 & 26 & 36 & 0.5 & 2 \\
+90 & 63 & 24 & 24 & 24 & 0.5 & 2 \\
+90 & 45 & 33 & 34 & 27 & 0.5 & 2 \\
+90 & 72 & 14 & 15 & 18 & 0.5 & 2 \\
+91 & 55 & 4 & 8 & 13 & 0.5 & 2 \\
+91 & 52 & 15 & 22 & 11 & 0.5 & 2 \\
+87 & 71 & 32 & 19 & 27 & 1.0 & 1 \\
+89 & 77 & 26 & 20 & 19 & 1.0 & 1 \\
+89 & 67 & 5 & 17 & 14 & 1.0 & 2 \\
+85 & 51 & 26 & 24 & 23 & 1.0 & 2 \\
+103 & 75 & 19 & 30 & 13 & 1.0 & 2 \\
+90 & 63 & 16 & 21 & 14 & 1.0 & 2 \\
+90 & 63 & 29 & 23 & 57 & 2.0 & 1 \\
+90 & 67 & 35 & 19 & 35 & 2.0 & 1 \\
+87 & 66 & 27 & 22 & 9 & 2.0 & 1 \\
+90 & 73 & 34 & 21 & 22 & 2.0 & 1 \\
+86 & 54 & 20 & 21 & 16 & 2.0 & 1 \\
+90 & 80 & 19 & 14 & 42 & 2.0 & 1 \\
+87 & 90 & 43 & 28 & 156 & 2.0 & 2 \\
+96 & 72 & 28 & 19 & 30 & 2.0 & 2 \\
+91 & 55 & 9 & 25 & 16 & 2.0 & 2 \\
+95 & 78 & 27 & 25 & 30 & 2.0 & 2 \\
+92 & 101 & 34 & 30 & 64 & 2.0 & 2 \\
+89 & 51 & 41 & 22 & 48 & 2.0 & 2 \\
+91 & 99 & 42 & 33 & 16 & 2.0 & 2 \\
+94 & 58 & 21 & 18 & 26 & 2.0 & 2 \\
+92 & 60 & 30 & 27 & 297 & 2.0 & 2 \\
+94 & 58 & 21 & 18 & 26 & 2.0 & 2 \\
+88 & 47 & 33 & 26 & 29 & 2.0 & 2 \\
+92 & 65 & 17 & 25 & 9 & 2.0 & 2 \\
+92 & 79 & 22 & 20 & 11 & 3.0 & 1 \\
+84 & 83 & 20 & 25 & 7 & 3.0 & 1 \\
+88 & 68 & 27 & 21 & 26 & 3.0 & 1 \\
+86 & 48 & 20 & 20 & 6 & 3.0 & 1 \\
+99 & 69 & 45 & 32 & 30 & 3.0 & 1 \\
+88 & 66 & 23 & 12 & 15 & 3.0 & 1 \\
+89 & 62 & 42 & 30 & 20 & 3.0 & 1 \\
+90 & 51 & 23 & 17 & 27 & 3.0 & 1 \\
+81 & 61 & 32 & 37 & 53 & 3.0 & 2 \\
+89 & 89 & 23 & 18 & 104 & 3.0 & 2 \\
+89 & 65 & 26 & 18 & 36 & 3.0 & 2 \\
+92 & 75 & 26 & 26 & 24 & 3.0 & 2 \\
+85 & 59 & 25 & 20 & 25 & 3.0 & 2 \\
+92 & 61 & 18 & 13 & 81 & 3.0 & 2 \\
+89 & 63 & 22 & 27 & 10 & 4.0 & 1 \\
+90 & 84 & 18 & 23 & 13 & 4.0 & 1 \\
+88 & 95 & 25 & 19 & 14 & 4.0 & 1 \\
+89 & 35 & 27 & 29 & 17 & 4.0 & 1 \\
+91 & 80 & 37 & 23 & 27 & 4.0 & 1 \\
+91 & 109 & 33 & 15 & 18 & 4.0 & 1 \\
+91 & 65 & 17 & 5 & 7 & 4.0 & 1 \\
+88 & 107 & 29 & 20 & 50 & 4.0 & 2 \\
+87 & 76 & 22 & 55 & 9 & 4.0 & 2 \\
+87 & 86 & 28 & 23 & 21 & 4.0 & 2 \\
+87 & 42 & 26 & 23 & 17 & 4.0 & 2 \\
+88 & 80 & 24 & 25 & 17 & 4.0 & 2 \\
+90 & 96 & 34 & 49 & 169 & 4.0 & 2 \\
+86 & 67 & 11 & 15 & 8 & 4.0 & 2 \\
+92 & 40 & 19 & 20 & 21 & 4.0 & 2 \\
+85 & 60 & 17 & 21 & 14 & 4.0 & 2 \\
+89 & 90 & 15 & 17 & 25 & 4.0 & 2 \\
+91 & 57 & 15 & 16 & 16 & 4.0 & 2 \\
+96 & 55 & 48 & 39 & 42 & 4.0 & 2 \\
+79 & 101 & 17 & 27 & 23 & 4.0 & 2 \\
+90 & 134 & 14 & 20 & 14 & 4.0 & 2 \\
+89 & 76 & 14 & 21 & 24 & 4.0 & 2 \\
+88 & 93 & 29 & 27 & 31 & 4.0 & 2 \\
+90 & 67 & 10 & 16 & 16 & 4.0 & 2 \\
+92 & 73 & 24 & 21 & 48 & 4.0 & 2 \\
+91 & 55 & 28 & 28 & 82 & 4.0 & 2 \\
+83 & 45 & 19 & 21 & 13 & 4.0 & 2 \\
+90 & 74 & 19 & 14 & 22 & 4.0 & 2 \\
+92 & 66 & 21 & 16 & 33 & 5.0 & 1 \\
+93 & 63 & 26 & 18 & 18 & 5.0 & 1 \\
+86 & 78 & 47 & 39 & 107 & 5.0 & 2 \\
+97 & 44 & 113 & 45 & 150 & 5.0 & 2 \\
+87 & 59 & 15 & 19 & 12 & 5.0 & 2 \\
+86 & 44 & 21 & 11 & 15 & 5.0 & 2 \\
+87 & 64 & 16 & 20 & 24 & 5.0 & 2 \\
+92 & 57 & 21 & 23 & 22 & 5.0 & 2 \\
+90 & 70 & 25 & 23 & 112 & 5.0 & 2 \\
+99 & 59 & 17 & 19 & 11 & 5.0 & 2 \\
+92 & 80 & 10 & 26 & 20 & 6.0 & 1 \\
+95 & 60 & 26 & 22 & 28 & 6.0 & 1 \\
+91 & 63 & 25 & 26 & 15 & 6.0 & 1 \\
+92 & 62 & 37 & 21 & 36 & 6.0 & 1 \\
+95 & 50 & 13 & 14 & 15 & 6.0 & 1 \\
+90 & 76 & 37 & 19 & 50 & 6.0 & 1 \\
+96 & 70 & 70 & 26 & 36 & 6.0 & 1 \\
+95 & 62 & 64 & 42 & 76 & 6.0 & 1 \\
+92 & 62 & 20 & 23 & 20 & 6.0 & 1 \\
+91 & 63 & 25 & 26 & 15 & 6.0 & 1 \\
+82 & 56 & 67 & 38 & 92 & 6.0 & 2 \\
+92 & 82 & 27 & 24 & 37 & 6.0 & 2 \\
+90 & 63 & 12 & 26 & 21 & 6.0 & 2 \\
+88 & 37 & 9 & 15 & 16 & 6.0 & 2 \\
+100 & 60 & 29 & 23 & 76 & 6.0 & 2 \\
+98 & 43 & 35 & 23 & 69 & 6.0 & 2 \\
+91 & 74 & 87 & 50 & 67 & 6.0 & 2 \\
+92 & 87 & 57 & 25 & 44 & 6.0 & 2 \\
+93 & 99 & 36 & 34 & 48 & 6.0 & 2 \\
+90 & 72 & 17 & 19 & 19 & 6.0 & 2 \\
+97 & 93 & 21 & 20 & 68 & 6.0 & 2 \\
+93 & 50 & 18 & 25 & 17 & 6.0 & 2 \\
+90 & 57 & 20 & 26 & 33 & 6.0 & 2 \\
+92 & 76 & 31 & 28 & 41 & 6.0 & 2 \\
+88 & 55 & 19 & 17 & 14 & 6.0 & 2 \\
+89 & 63 & 24 & 29 & 29 & 6.0 & 2 \\
+92 & 79 & 70 & 32 & 84 & 7.0 & 1 \\
+92 & 93 & 58 & 35 & 120 & 7.0 & 1 \\
+93 & 84 & 58 & 47 & 62 & 7.0 & 2 \\
+97 & 71 & 29 & 22 & 52 & 8.0 & 1 \\
+84 & 99 & 33 & 19 & 26 & 8.0 & 1 \\
+96 & 44 & 42 & 23 & 73 & 8.0 & 1 \\
+90 & 62 & 22 & 21 & 21 & 8.0 & 1 \\
+92 & 94 & 18 & 17 & 6 & 8.0 & 1 \\
+90 & 67 & 77 & 39 & 114 & 8.0 & 1 \\
+97 & 71 & 29 & 22 & 52 & 8.0 & 1 \\
+91 & 69 & 25 & 25 & 66 & 8.0 & 2 \\
+93 & 59 & 17 & 20 & 14 & 8.0 & 2 \\
+92 & 95 & 85 & 48 & 200 & 8.0 & 2 \\
+90 & 50 & 26 & 22 & 53 & 8.0 & 2 \\
+91 & 62 & 59 & 47 & 60 & 8.0 & 2 \\
+92 & 93 & 22 & 28 & 123 & 9.0 & 1 \\
+92 & 77 & 86 & 41 & 31 & 10.0 & 1 \\
+86 & 66 & 22 & 24 & 26 & 10.0 & 2 \\
+98 & 57 & 31 & 34 & 73 & 10.0 & 2 \\
+95 & 80 & 50 & 64 & 55 & 10.0 & 2 \\
+92 & 108 & 53 & 33 & 94 & 12.0 & 2 \\
+97 & 92 & 22 & 28 & 49 & 12.0 & 2 \\
+93 & 77 & 39 & 37 & 108 & 16.0 & 1 \\
+94 & 83 & 81 & 34 & 201 & 20.0 & 1 \\
+87 & 75 & 25 & 21 & 14 & 0.0 & 1 \\
+88 & 56 & 23 & 18 & 12 & 0.0 & 1 \\
+84 & 97 & 41 & 20 & 32 & 0.0 & 2 \\
+94 & 91 & 27 & 20 & 15 & 0.5 & 1 \\
+97 & 62 & 17 & 13 & 5 & 0.5 & 1 \\
+92 & 85 & 25 & 20 & 12 & 0.5 & 1 \\
+82 & 48 & 27 & 15 & 12 & 0.5 & 1 \\
+88 & 74 & 31 & 25 & 15 & 0.5 & 1 \\
+95 & 77 & 30 & 14 & 21 & 0.5 & 1 \\
+88 & 94 & 26 & 18 & 8 & 0.5 & 1 \\
+91 & 70 & 19 & 19 & 22 & 0.5 & 1 \\
+83 & 54 & 27 & 15 & 12 & 0.5 & 1 \\
+91 & 105 & 40 & 26 & 56 & 0.5 & 1 \\
+86 & 79 & 37 & 28 & 14 & 0.5 & 1 \\
+91 & 96 & 35 & 22 & 135 & 0.5 & 1 \\
+89 & 82 & 23 & 14 & 35 & 0.5 & 1 \\
+90 & 73 & 24 & 23 & 11 & 0.5 & 1 \\
+90 & 87 & 19 & 25 & 19 & 0.5 & 1 \\
+89 & 82 & 33 & 32 & 18 & 0.5 & 1 \\
+85 & 79 & 17 & 8 & 9 & 0.5 & 1 \\
+85 & 119 & 30 & 26 & 17 & 0.5 & 1 \\
+78 & 69 & 24 & 18 & 31 & 0.5 & 1 \\
+88 & 107 & 34 & 21 & 27 & 0.5 & 1 \\
+89 & 115 & 17 & 27 & 7 & 0.5 & 1 \\
+92 & 67 & 23 & 15 & 12 & 0.5 & 1 \\
+89 & 101 & 27 & 34 & 14 & 0.5 & 1 \\
+91 & 84 & 11 & 12 & 10 & 0.5 & 1 \\
+94 & 101 & 41 & 20 & 53 & 0.5 & 2 \\
+88 & 46 & 29 & 22 & 18 & 0.5 & 2 \\
+88 & 122 & 35 & 29 & 42 & 0.5 & 2 \\
+84 & 88 & 28 & 25 & 35 & 0.5 & 2 \\
+90 & 79 & 18 & 15 & 24 & 0.5 & 2 \\
+87 & 69 & 22 & 26 & 11 & 0.5 & 2 \\
+65 & 63 & 19 & 20 & 14 & 0.5 & 2 \\
+90 & 64 & 12 & 17 & 14 & 0.5 & 2 \\
+85 & 58 & 18 & 24 & 16 & 0.5 & 2 \\
+88 & 81 & 41 & 27 & 36 & 0.5 & 2 \\
+86 & 78 & 52 & 29 & 62 & 0.5 & 2 \\
+82 & 74 & 38 & 28 & 48 & 0.5 & 2 \\
+86 & 58 & 36 & 27 & 59 & 0.5 & 2 \\
+94 & 56 & 30 & 18 & 27 & 0.5 & 2 \\
+87 & 57 & 30 & 30 & 22 & 0.5 & 2 \\
+98 & 74 & 148 & 75 & 159 & 0.5 & 2 \\
+94 & 75 & 20 & 25 & 38 & 0.5 & 2 \\
+83 & 68 & 17 & 20 & 71 & 0.5 & 2 \\
+93 & 56 & 25 & 21 & 33 & 0.5 & 2 \\
+101 & 65 & 18 & 21 & 22 & 0.5 & 2 \\
+92 & 65 & 25 & 20 & 31 & 0.5 & 2 \\
+92 & 58 & 14 & 16 & 13 & 0.5 & 2 \\
+86 & 58 & 16 & 23 & 23 & 0.5 & 2 \\
+85 & 62 & 15 & 13 & 22 & 0.5 & 2 \\
+86 & 57 & 13 & 20 & 13 & 0.5 & 2 \\
+86 & 54 & 26 & 30 & 13 & 0.5 & 2 \\
+81 & 41 & 33 & 27 & 34 & 1.0 & 1 \\
+91 & 67 & 32 & 26 & 13 & 1.0 & 1 \\
+91 & 80 & 21 & 19 & 14 & 1.0 & 1 \\
+92 & 60 & 23 & 15 & 19 & 1.0 & 1 \\
+91 & 60 & 32 & 14 & 8 & 1.0 & 1 \\
+93 & 65 & 28 & 22 & 10 & 1.0 & 1 \\
+90 & 63 & 45 & 24 & 85 & 1.0 & 2 \\
+87 & 92 & 21 & 22 & 37 & 1.0 & 2 \\
+83 & 78 & 31 & 19 & 115 & 1.0 & 2 \\
+95 & 62 & 24 & 23 & 14 & 1.0 & 2 \\
+93 & 59 & 41 & 30 & 48 & 1.0 & 2 \\
+84 & 82 & 43 & 32 & 38 & 2.0 & 1 \\
+87 & 71 & 33 & 20 & 22 & 2.0 & 1 \\
+86 & 44 & 24 & 15 & 18 & 2.0 & 1 \\
+86 & 66 & 28 & 24 & 21 & 2.0 & 1 \\
+88 & 58 & 31 & 17 & 17 & 2.0 & 1 \\
+90 & 61 & 28 & 29 & 31 & 2.0 & 1 \\
+88 & 69 & 70 & 24 & 64 & 2.0 & 1 \\
+93 & 87 & 18 & 17 & 26 & 2.0 & 1 \\
+98 & 58 & 33 & 21 & 28 & 2.0 & 1 \\
+91 & 44 & 18 & 18 & 23 & 2.0 & 2 \\
+87 & 75 & 37 & 19 & 70 & 2.0 & 2 \\
+94 & 91 & 30 & 26 & 25 & 2.0 & 2 \\
+88 & 85 & 14 & 15 & 10 & 2.0 & 2 \\
+89 & 109 & 26 & 25 & 27 & 2.0 & 2 \\
+87 & 59 & 37 & 27 & 34 & 2.0 & 2 \\
+93 & 58 & 20 & 23 & 18 & 2.0 & 2 \\
+88 & 57 & 9 & 15 & 16 & 2.0 & 2 \\
+94 & 65 & 38 & 27 & 17 & 3.0 & 1 \\
+91 & 71 & 12 & 22 & 11 & 3.0 & 1 \\
+90 & 55 & 20 & 20 & 16 & 3.0 & 1 \\
+91 & 64 & 21 & 17 & 26 & 3.0 & 2 \\
+88 & 47 & 35 & 26 & 33 & 3.0 & 2 \\
+82 & 72 & 31 & 20 & 84 & 3.0 & 2 \\
+85 & 58 & 83 & 49 & 51 & 3.0 & 2 \\
+91 & 54 & 25 & 22 & 35 & 4.0 & 1 \\
+98 & 50 & 27 & 25 & 53 & 4.0 & 2 \\
+86 & 62 & 29 & 21 & 26 & 4.0 & 2 \\
+89 & 48 & 32 & 22 & 14 & 4.0 & 2 \\
+82 & 68 & 20 & 22 & 9 & 4.0 & 2 \\
+83 & 70 & 17 & 19 & 23 & 4.0 & 2 \\
+96 & 70 & 21 & 26 & 21 & 4.0 & 2 \\
+94 & 117 & 77 & 56 & 52 & 4.0 & 2 \\
+93 & 45 & 11 & 14 & 21 & 4.0 & 2 \\
+93 & 49 & 27 & 21 & 29 & 4.0 & 2 \\
+84 & 73 & 46 & 32 & 39 & 4.0 & 2 \\
+91 & 63 & 17 & 17 & 46 & 4.0 & 2 \\
+90 & 57 & 31 & 18 & 37 & 4.0 & 2 \\
+87 & 45 & 19 & 13 & 16 & 4.0 & 2 \\
+91 & 68 & 14 & 20 & 19 & 4.0 & 2 \\
+86 & 55 & 29 & 35 & 108 & 4.0 & 2 \\
+91 & 86 & 52 & 47 & 52 & 4.0 & 2 \\
+88 & 46 & 15 & 33 & 55 & 4.0 & 2 \\
+85 & 52 & 22 & 23 & 34 & 4.0 & 2 \\
+89 & 72 & 33 & 27 & 55 & 4.0 & 2 \\
+95 & 59 & 23 & 18 & 19 & 4.0 & 2 \\
+94 & 43 & 154 & 82 & 121 & 4.0 & 2 \\
+96 & 56 & 38 & 26 & 23 & 5.0 & 2 \\
+90 & 52 & 10 & 17 & 12 & 5.0 & 2 \\
+94 & 45 & 20 & 16 & 12 & 5.0 & 2 \\
+99 & 42 & 14 & 21 & 49 & 5.0 & 2 \\
+93 & 102 & 47 & 23 & 37 & 5.0 & 2 \\
+94 & 71 & 25 & 26 & 31 & 5.0 & 2 \\
+92 & 73 & 33 & 34 & 115 & 5.0 & 2 \\
+87 & 54 & 41 & 29 & 23 & 6.0 & 1 \\
+92 & 67 & 15 & 14 & 14 & 6.0 & 1 \\
+98 & 101 & 31 & 26 & 32 & 6.0 & 1 \\
+92 & 53 & 51 & 33 & 92 & 6.0 & 1 \\
+97 & 94 & 43 & 43 & 82 & 6.0 & 1 \\
+93 & 43 & 11 & 16 & 54 & 6.0 & 1 \\
+93 & 68 & 24 & 18 & 19 & 6.0 & 1 \\
+95 & 36 & 38 & 19 & 15 & 6.0 & 1 \\
+99 & 86 & 58 & 42 & 203 & 6.0 & 1 \\
+98 & 66 & 103 & 57 & 114 & 6.0 & 1 \\
+92 & 80 & 10 & 26 & 20 & 6.0 & 1 \\
+96 & 74 & 27 & 25 & 43 & 6.0 & 2 \\
+95 & 93 & 21 & 27 & 47 & 6.0 & 2 \\
+86 & 109 & 16 & 22 & 28 & 6.0 & 2 \\
+91 & 46 & 30 & 24 & 39 & 7.0 & 2 \\
+102 & 82 & 34 & 78 & 203 & 7.0 & 2 \\
+85 & 50 & 12 & 18 & 14 & 7.0 & 2 \\
+91 & 57 & 33 & 23 & 12 & 8.0 & 1 \\
+91 & 52 & 76 & 32 & 24 & 8.0 & 1 \\
+93 & 70 & 46 & 30 & 33 & 8.0 & 1 \\
+87 & 55 & 36 & 19 & 25 & 8.0 & 1 \\
+98 & 123 & 28 & 24 & 31 & 8.0 & 1 \\
+82 & 55 & 18 & 23 & 44 & 8.0 & 2 \\
+95 & 73 & 20 & 25 & 225 & 8.0 & 2 \\
+97 & 80 & 17 & 20 & 53 & 8.0 & 2 \\
+100 & 83 & 25 & 24 & 28 & 8.0 & 2 \\
+88 & 91 & 56 & 35 & 126 & 9.0 & 2 \\
+91 & 138 & 45 & 21 & 48 & 10.0 & 1 \\
+92 & 41 & 37 & 22 & 37 & 10.0 & 1 \\
+86 & 123 & 20 & 25 & 23 & 10.0 & 2 \\
+91 & 93 & 35 & 34 & 37 & 10.0 & 2 \\
+87 & 87 & 15 & 23 & 11 & 10.0 & 2 \\
+87 & 56 & 52 & 43 & 55 & 10.0 & 2 \\
+99 & 75 & 26 & 24 & 41 & 12.0 & 1 \\
+96 & 69 & 53 & 43 & 203 & 12.0 & 2 \\
+98 & 77 & 55 & 35 & 89 & 15.0 & 1 \\
+91 & 68 & 27 & 26 & 14 & 16.0 & 1 \\
+98 & 99 & 57 & 45 & 65 & 20.0 & 1 \\
+\bottomrule
+\end{longtable}
+
+The \texttt{setup.analysis()} function imports a dataset into the global
+environment with the name provided to the \texttt{target\ =} argument.
+
+\hypertarget{eda}{%
+\subsection{EDA}\label{eda}}
+
+\emph{This section reviews the \texttt{Liver} dataset. In an improvement
+over the previous report, it now incorporates an assessment of feature
+correlations.}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Recode the response.}
+\NormalTok{liver }\OtherTok{\textless{}{-}}\NormalTok{ Liver }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{make.response}\NormalTok{()}
+\FunctionTok{summary}\NormalTok{(liver)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##     blood.1         blood.2         blood.3     
+##  Min.   : 65.0   Min.   : 23.0   Min.   :  4.0  
+##  1st Qu.: 87.0   1st Qu.: 57.0   1st Qu.: 19.0  
+##  Median : 90.0   Median : 67.0   Median : 26.0  
+##  Mean   : 90.2   Mean   : 69.9   Mean   : 30.4  
+##  3rd Qu.: 93.0   3rd Qu.: 80.0   3rd Qu.: 34.0  
+##  Max.   :103.0   Max.   :138.0   Max.   :155.0  
+##     blood.4        blood.5          drinks     
+##  Min.   : 5.0   Min.   :  5.0   Min.   : 0.00  
+##  1st Qu.:19.0   1st Qu.: 15.0   1st Qu.: 0.50  
+##  Median :23.0   Median : 25.0   Median : 3.00  
+##  Mean   :24.6   Mean   : 38.3   Mean   : 3.46  
+##  3rd Qu.:27.0   3rd Qu.: 46.0   3rd Qu.: 6.00  
+##  Max.   :82.0   Max.   :297.0   Max.   :20.00  
+##        severity  
+##  Not Severe:200  
+##  Severe    :145  
+##                  
+##                  
+##                  
+## 
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{liver.info }\OtherTok{\textless{}{-}} \FunctionTok{analysis.eda}\NormalTok{(Liver, truth)}
+\FunctionTok{summary}\NormalTok{(liver.info)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##  n_samples n_features 
+##        345          7 
+## Label counts: 
+##   pos   neg total 
+##   145   200   345 
+## Class prior probabilities: 
+##    pos    neg 
+## 0.4203 0.5797
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Plot using corrplot::corrplot wrapper.}
+\NormalTok{liver.corrplot }\OtherTok{\textless{}{-}} \FunctionTok{corr.plot}\NormalTok{(}
+\NormalTok{  liver, }\AttributeTok{sig.level =} \FloatTok{0.05}\NormalTok{, }\AttributeTok{insig =} \StringTok{"blank"}\NormalTok{,}
+  \AttributeTok{title =} \StringTok{"Correlation Plot"}\NormalTok{,}
+  \AttributeTok{mar =} \FunctionTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{,}\DecValTok{1}\NormalTok{,}\DecValTok{2}\NormalTok{,}\DecValTok{1}\NormalTok{)}
+\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{center}\includegraphics{figure/analysis-eda-corrplot-1} \end{center}
+
+The data behind the above correlation plot is provided below:
+
+\begin{verbatim}
+## Feature correlation matrix: 
+##         blood.1 blood.2 blood.3 blood.4 blood.5 drinks
+## blood.1  1.0000 0.04410 0.14770  0.1878  0.2223 0.3127
+## blood.2  0.0441 1.00000 0.07621  0.1461  0.1331 0.1008
+## blood.3  0.1477 0.07621 1.00000  0.7397  0.5034 0.2068
+## blood.4  0.1878 0.14606 0.73967  1.0000  0.5276 0.2796
+## blood.5  0.2223 0.13314 0.50344  0.5276  1.0000 0.3412
+## drinks   0.3127 0.10080 0.20685  0.2796  0.3412 1.0000
+\end{verbatim}
 
 \newpage
 
@@ -366,7 +676,7 @@ relative to the project root.}
 \begin{verbatim}
 ## R version 4.1.1 (2021-08-10)
 ## Platform: x86_64-w64-mingw32/x64 (64-bit)
-## Running under: Windows 10 x64 (build 19042)
+## Running under: Windows 10 x64 (build 19043)
 ## 
 ## Matrix products: default
 ## 
@@ -388,22 +698,22 @@ relative to the project root.}
 ## [10] knitr_1.36    
 ## 
 ## loaded via a namespace (and not attached):
-##  [1] compiler_4.1.1   pillar_1.6.3     jquerylib_0.1.4 
-##  [4] iterators_1.0.13 tools_4.1.1      bit_4.0.4       
-##  [7] digest_0.6.28    corrplot_0.90    jsonlite_1.7.2  
-## [10] evaluate_0.14    lifecycle_1.0.1  tibble_3.1.5    
-## [13] gtable_0.3.0     pkgconfig_2.0.3  rlang_0.4.11    
-## [16] parallel_4.1.1   yaml_2.2.1       xfun_0.26       
-## [19] fastmap_1.1.0    withr_2.4.2      stringr_1.4.0   
-## [22] hms_1.1.1        generics_0.1.0   vctrs_0.3.8     
-## [25] bit64_4.0.5      tidyselect_1.1.1 rprojroot_2.0.2 
-## [28] grid_4.1.1       glue_1.4.2       here_1.0.1      
-## [31] R6_2.5.1         fansi_0.5.0      vroom_1.5.5     
-## [34] tzdb_0.1.2       readr_2.0.2      purrr_0.3.4     
-## [37] scales_1.1.1     codetools_0.2-18 htmltools_0.5.2 
-## [40] ellipsis_0.3.2   colorspace_2.0-2 renv_0.14.0     
-## [43] utf8_1.2.2       stringi_1.7.5    munsell_0.5.0   
-## [46] crayon_1.4.1
+##  [1] highr_0.9        jquerylib_0.1.4  compiler_4.1.1  
+##  [4] pillar_1.6.3     iterators_1.0.13 tools_4.1.1     
+##  [7] bit_4.0.4        digest_0.6.28    corrplot_0.90   
+## [10] jsonlite_1.7.2   evaluate_0.14    lifecycle_1.0.1 
+## [13] tibble_3.1.5     gtable_0.3.0     pkgconfig_2.0.3 
+## [16] rlang_0.4.11     cli_3.0.1        rstudioapi_0.13 
+## [19] yaml_2.2.1       xfun_0.26        fastmap_1.1.0   
+## [22] stringr_1.4.0    withr_2.4.2      hms_1.1.1       
+## [25] generics_0.1.0   vctrs_0.3.8      bit64_4.0.5     
+## [28] rprojroot_2.0.2  grid_4.1.1       tidyselect_1.1.1
+## [31] glue_1.4.2       here_1.0.1       R6_2.5.1        
+## [34] fansi_0.5.0      vroom_1.5.5      tzdb_0.1.2      
+## [37] readr_2.0.2      purrr_0.3.4      scales_1.1.1    
+## [40] codetools_0.2-18 htmltools_0.5.2  ellipsis_0.3.2  
+## [43] colorspace_2.0-2 renv_0.14.0      utf8_1.2.2      
+## [46] stringi_1.7.5    munsell_0.5.0    crayon_1.4.1
 \end{verbatim}
 
 \end{document}

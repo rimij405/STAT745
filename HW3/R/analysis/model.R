@@ -2,7 +2,17 @@
 #
 # Model related functions.
 
-## ---- def-analysis-model ----
+## ---- analysis::model::constants ----
+
+MODEL <- list(
+  . = glm,
+  params = list(
+    formula = Y ~ .,
+    family = "binomial"
+  )
+)
+
+## ---- analysis::model::exports ----
 
 #' Fit a model.
 #'
@@ -13,11 +23,8 @@
 #'
 #' @return Fit model object.
 fit.model <- function(.data,
-                      algorithm = glm,
-                      params = list(
-                        formula = Y ~ .,
-                        family = "binomial"
-                      ), ...) {
+                      algorithm = MODEL$.,
+                      params = MODEL$params, ...) {
 
   # Get summary and replace the expanded $call.
   model_expr <- sprintf("%s", deparse1(sys.call()))

@@ -2,23 +2,15 @@
 #
 # Common functions for building / rendering.
 
-# Source the utility functions.
-source(here::here("R/packages.R"))
-require.deps()
-attach.deps()
+## ---- build::constants ----
 
-# Source the build functions for the dataset.
-source(here::here("R/build/dataset.R"))
+BUILDS <- list(
+  dataset = here::here("R/build/dataset.R"),
+  report = here::here("R/build/report.R")
+)
 
-# Source the build functions for the report.
-source(here::here("R/build/report.R"))
+## ---- build::imports ----
 
-## ---- def-build ----
-
-build.project <- function(
-  opts_dataset = list(),
-  opts_report = list()
-) {
-  do.call(make.dataset, args = opts_dataset)
-  do.call(make.report, args = opts_report)
-}
+# See: source.submodule()
+source(here::here("R/utils.R"))
+source.submodule(files = BUILDS)

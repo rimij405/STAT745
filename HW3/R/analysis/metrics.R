@@ -2,7 +2,17 @@
 #
 # Functions related to metrics.
 
-## ---- def-analysis-metrics ----
+## ---- analysis::metrics::constants ----
+
+METRICS <- list(
+  default_threshold = 0.5,
+  offset = list(
+    x = 0.05,
+    y = 0.25
+  )
+)
+
+## ---- analysis::metrics::exports ----
 
 #' Calculate the probability of the provided condition.
 #'
@@ -163,8 +173,8 @@ plot.optimal.error.rates <- function(errors, thresholds, ..., limit = 1.0, digit
 
   # Get the annotation.
   annotation <- data.frame(
-    x = c(optimal_threshold + 0.05),
-    y = c(optimal_error - 0.025),
+    x = c(optimal_threshold + METRICS$offset$x),
+    y = c(optimal_error - METRICS$offset$y),
     label = c(sprintf("Error = %s, Threshold = %s", rounded_error, rounded_threshold))
   )
 

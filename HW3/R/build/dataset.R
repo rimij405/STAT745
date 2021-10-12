@@ -3,40 +3,30 @@
 # Contains make/clean functions for making
 # and cleaning the dataset cache files.
 
-# Import the utilities.
+## ---- build::dataset::constants ----
+
+.TARGETS <- list(
+  liver = "Liver"
+)
+
+DATASETS <- list(
+  liver = here::here("data-raw/liver.R")
+)
+
+## ---- build::dataset::imports ----
+
+# See: source.submodule()
 source(here::here("R/utils.R"))
-source.utils()
+source.submodule(files = UTILS$printf)
+source.submodule(files = DATASETS$liver)
 
-## ---- def-build-dataset ----
-
-#' Make the dataset.
-#'
-#' @param target Adds a variable to the global environment
-#' with this name.
-#' @param cache If FALSE, will force rebuild of dataset.
-#'
-#' @return Data.frame containing the target dataset.
-make.dataset <- function(target = "Liver.rds", ..., cache = TRUE, clean = FALSE) {
-  if (!exists(target) || !cache) {
-    # Functions for creating dataset are provided by the
-    # `data-raw/liver.R` script.
-    if (clean) { clean.dataset(target = target, dry = FALSE) }
-    source(here::here("data-raw/liver.R"))
-    messagef("Loading '%s'...", target)
-  } else {
-    messagef("'%s' exists.", target)
-  }
-  assign(target, get.liver(name = target), envir = .GlobalEnv)
-  target_df <- get(target)
-  messagef("Registered target dataset to global environment. Access using '%s'.", target)
-  return(target_df)
-}
+## ---- build::dataset::exports ----
 
 #' Clean the dataset.
 #'
 #' @param target Target file to clean.
 #' @param dry Dry run?
-clean.dataset <- function(target = "Liver.rds", ..., dry = FALSE) {
+clean.dataset <- function(target = .TARGETS$liver, ..., dry = FALSE) {
 
   # Generic remove function that skips the inner function when dry.
   remove.x <- function(x, FUN = rm, ..., dry = FALSE) {
@@ -92,13 +82,13 @@ clean.dataset <- function(target = "Liver.rds", ..., dry = FALSE) {
 
   .VARS <- c(
     target,
-    "liver.filepaths",
-    "liver.colnames",
-    "liver.coltypes",
+    "LIVER.FILEPATHS",
+    "LIVER.COLNAMES",
+    "LIVER.COLTYPES",
     "import.liver",
     "read.liver",
     "cache.liver",
-    "get.liver"
+    "load.liver"
   )
 
   # Remove the files.
@@ -109,4 +99,27 @@ clean.dataset <- function(target = "Liver.rds", ..., dry = FALSE) {
 
   # Clean complete.
   message("Clean completed. Run `make.dataset()` to rebuild dataset.")
+}
+
+#' Make the dataset.
+#'
+#' @param target Adds a variable to the global environment
+#' with this name.
+#' @param cache If FALSE, will force rebuild of dataset.
+#'
+#' @return Data.frame containing the target dataset.
+make.dataset <- function(target = .TARGETS$liver, ..., cache = TRUE, clean = FALSE) {
+  if (!exists(target) || !cache) {
+    # Functions for creating dataset are provided by the
+    # `data-raw/liver.R` script.
+    if (clean) { clean.dataset(target = target, dry = FALSE) }
+    source(here::here("data-raw/liver.R"))
+    messagef("Loading '%s'...", target)
+  } else {
+    messagef("'%s' exists.", target)
+  }
+  load.liver(name = target)
+  target_df <- get(target)
+  messagef("Registered target dataset to global environment. Access using '%s'.", target)
+  return(target_df)
 }

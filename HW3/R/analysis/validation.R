@@ -2,13 +2,16 @@
 #
 # Cross validation functions.
 
-# Source the model function.
-source(here::here("R/analysis/model.R"))
+## ---- analysis::validation::constants ----
 
-# Source the model function.
-source(here::here("R/analysis/metrics.R"))
+## ---- analysis::validation::imports ----
 
-## ---- def-analysis-validation ----
+# Source the utility functions.
+source(here::here("R/utils.R"))
+source.submodule(ANALYSIS$model)
+source.submodule(ANALYSIS$metrics)
+
+## ---- analysis::validation::exports ----
 
 #' Make sequence (n = `length`) of equidistant threshold values between `from` and `to`.
 #'
@@ -43,18 +46,18 @@ calc.cv.error.rates <- function(.data, truth,
                                 k = 10, rounds = 10, m = 10,
                                 thresholds = seq(from = 0, to = 1, length = m)) {
 
-  printf("%s", deparse1(sys.call()))
-  printf("%s", ls())
+  # printf("%s", deparse1(sys.call()))
+  # printf("%s", ls())
 
   # Get the sample count.
   n_samples <- nrow(.data)
   m <- length(thresholds)
-  print("---------------------------")
+  println("---------------------------")
   printf("Performing %s-fold CV:", k)
   printf("# Samples: %s", n_samples)
   printf("# Thresholds: %s", m)
   printf("# k folds: %s || # rounds: %s", k, rounds)
-  print("---------------------------")
+  println("---------------------------")
 
   # Prepare collection of matrices.
   # - Creates an array of k matrices (all filled with 0).
@@ -266,12 +269,12 @@ make.cv.confusion.mat <- function(.data, truth,
 
   # Get the sample count.
   n_samples <- nrow(.data)
-  print("---------------------------")
+  println("---------------------------")
   printf("Calculating %s-fold CV table:", k)
   printf("# Samples: %s", n_samples)
-  printf("# Threshold: %s", threshold)
+  printf("# Threshold: %s", round(threshold))
   printf("# k folds: %s || # rounds: %s", k, rounds)
-  print("---------------------------")
+  println("---------------------------")
 
   # Prepare collection of matrices.
   # - (2 by 2) matrices for each round, for each fold in k-folds.

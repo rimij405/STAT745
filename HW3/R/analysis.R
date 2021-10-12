@@ -1,24 +1,23 @@
 # R/analysis.R
 #
-# Perform EDA on the Liver dataset.
+# Analysis functions for the liver dataset.
 
-# Source the utility functions.
+## ---- analysis::constants ----
+
+ANALYSIS <- list(
+  setup = here::here("R/analysis/setup.R"),
+  eda = here::here("R/analysis/eda.R"),
+  model = here::here("R/analysis/model.R"),
+  metrics = here::here("R/analysis/metrics.R"),
+  validation = here::here("R/analysis/validation.R")
+)
+
+## ---- analysis::imports ----
+
+# Source the utility function.
 source(here::here("R/packages.R"))
-
-# Source the setup script.
-source(here::here("R/analysis/setup.R"))
-
-# Source the EDA functions.
-source(here::here("R/analysis/eda.R"))
-
-# Source the model function.
-source(here::here("R/analysis/model.R"))
-
-# Source the model function.
-source(here::here("R/analysis/metrics.R"))
-
-# Source the model function.
-source(here::here("R/analysis/validation.R"))
+source(here::here("R/utils.R"))
+source.submodule(files = ANALYSIS)
 
 ## ---- def-analysis-exec ----
 
@@ -99,7 +98,26 @@ analysis.clf <- function(.data,
                            formula = Y ~ .,
                            family = "binomial"
                          ),
+                         call = NULL,
                          pos = TRUE, neg = FALSE) {
+
+  # Helper function for extracting the expression.
+  .get.expr <- function(.obj) {
+    # Format:
+    # method(formula, data = .data, params = params)
+    .method <- class(.obj)[[1]]
+    .formula <- deparse(.obj$formula)
+    .source <- deparse(substitute(.data, env = parent.frame()))
+    if (exists("family", where = params)) {
+      .family <- .obj$family$family
+      fmt.expr <- "%s(formula = %s, family = %s, data = %s)"
+      obj.expr <- sprintf(fmt.expr, .method, .formula, .family, .source)
+    } else {
+      fmt.expr <- "%s(formula = %s, data = %s)"
+      obj.expr <- sprintf(fmt.expr, .method, .formula, .source)
+    }
+    return(obj.expr)
+  }
 
   # Fit and summarize a model.
   baseline <- fit.model(
@@ -107,7 +125,7 @@ analysis.clf <- function(.data,
     algorithm = algorithm,
     params = params)
   clf <- baseline$obj
-  clf$call <- baseline$expr
+  clf$call <- .get.expr(baseline$obj)
   clf_summary <- summarize.model(clf)
 
   # Calculate table.
