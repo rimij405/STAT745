@@ -175,6 +175,22 @@ summary(truth)
 <!-- PAGE BREAK -->
 \newpage
 
+```{r analysis-eda-distributions, eval=FALSE, include=FALSE}
+liver.qq.data <- liver %>% tidyr::pivot_longer(drinks, 
+                                               names_to = "feature", 
+                                               values_to = "values")
+
+ggplot(liver.qq.data, aes(sample = values)) +
+  stat_qq(aes(color = feature)) +
+  # stat_qq(aes(color = severity)) +
+  # scale_color_manual(values = c("#00AFBB", "#E7B800")) +
+  labs(y = "quantity") +
+  theme(
+    legend.position = "top"
+  )
+
+```
+
 ### Feature Correlations
 
 ```{r analysis-eda-summary, eval=FALSE, echo=TRUE}
@@ -206,33 +222,80 @@ The data behind the above correlation plot is provided below:
 println("Feature correlation matrix: ")
 print(liver.corrplot$corr)
 ```
+
+## Model Analysis
+
+Models will be tracked using a named list `MODELS`:
+
+```{r analysis-models-setup}
+# Create a global `models` variable to keep track of models.
+MODELS <<- list()
+# Also, declares a reusable formula.
+.FORMULA <<- severity ~ .
+```
+
 ### Baseline Model Analysis
 
-```{r analysis-glm-baseline, results='hide'}
-# TODO: Replace glm with lda model.
-liver.baseline <- analysis.clf(
-  liver, truth,
-  algorithm = glm,
-  params = list(
-    formula = severity ~ .,
-    family = "binomial"
-  ),
-  pos = "Severe", neg = "Not Severe"
-)
-```
-```{r analysis-glm-baseline-summary, echo=FALSE}
-println("Summary of baseline model: "); 
-print(liver.baseline$summary)
+```{r analysis-lda-baseline-fit}
+# Fit LDA with priors calculated from the input sample.
+# Equivalent to: MASS::lda(severity ~ ., data = liver)
+# We use `.` instead of `baseline` for ease of typing.
+MODELS$. <- fit.model(quote(liver), algorithm = lda, formula = .FORMULA)
+
+# Temporary variable `model` for current analysed model:
+model <- MODELS$.
 ```
 
-```{r analysis-glm-baseline-error, echo=FALSE}
-println("Baseline classification table: ")
-print(unlist(list(
-  "Baseline model error rate:" = liver.baseline$error
-)))
-print(liver.baseline$table)
+```{r analysis-lda-baseline-summary}
+# Save listing of attributes.
+model$summary <- summarize.model(model$obj)
+println("Baseline LDA Summary:")
+print(model$obj) # show summary.
 ```
-```{r analysis-glm-optimal-error, fig.width=10, fig.size=8, echo=FALSE}
+
+```{r analysis-lda-baseline-table}
+model$predict <- predict(model$obj, liver)
+model$table <- table(model$predict$class, liver$severity)
+model$error <- calc.error.rate(model$table)
+model$miss <- (model$predict$class != liver$severity)
+model$total_miss <- sum(model$miss)
+println("Baseline model error rate:", round(model$error, 4))
+println("\nBaseline misclassification table:")
+print(model$table)
+println("\nTotal misclassified:", model$total_miss, sep = " ")
+
+# Save the model.
+MODELS$. <- model
+```
+
+### Optimal Prior Probability (on Positive Class)
+
+```{r analysis-lda-baseline-optimal}
+model$optimal_priors <- calc.optimal.priors()
+```
+
+
+
+
+```{r analysis-lda-weighted, include=FALSE}
+# Fit model with high cost of misclassification (favoring "Severe")
+cost10 <- calc.priors(liver, truth, weight = 10)
+model.cost <- fit.model(.data = quote(liver), 
+                        algorithm = MASS::lda,
+                        formula = severity ~ .,
+                        prior = cost10$priors)$obj
+print(model.cost)
+```
+```{r analysis-lda-weighted-table, include=FALSE}
+# Make predictions with baseline LDA model.
+println("\nWeighted (x10 Cost) misclassification table: ")
+model.cost$predict <- predict(model.cost, liver)
+model.cost$miss <- (model.cost$predict$class != liver$severity)
+(model.cost$table <- table(model.cost$predict$class, liver$severity))
+println("\nTotal misclassified:", sum(model.cost$miss), sep = " ")
+```
+
+```{r analysis-lda-optimal-error, fig.width=10, fig.size=8, echo=FALSE}
 print(liver.baseline$plot)
 println("Misclassification table using optimal threshold: ")
 summary(liver.baseline$optimal_table)

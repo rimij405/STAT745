@@ -83,6 +83,7 @@ require.deps <- function() {
 #' Require and attach these packages to the project namespace.
 #' @export
 attach.deps <- function() {
+  library(MASS)
   library(magrittr)
   library(foreach)
   library(ggplot2)

@@ -24,7 +24,7 @@ MODEL <- list(
 #' @return Fit model object.
 fit.model <- function(.data,
                       algorithm = MODEL$.,
-                      params = MODEL$params, ...) {
+                      params = list(), ...) {
 
   # Get summary and replace the expanded $call.
   model_expr <- sprintf("%s", deparse1(sys.call()))

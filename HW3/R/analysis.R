@@ -9,7 +9,8 @@ ANALYSIS <- list(
   eda = here::here("R/analysis/eda.R"),
   model = here::here("R/analysis/model.R"),
   metrics = here::here("R/analysis/metrics.R"),
-  validation = here::here("R/analysis/validation.R")
+  validation = here::here("R/analysis/validation.R"),
+  lda = here::here("R/analysis/lda.R")
 )
 
 ## ---- analysis::imports ----
@@ -101,31 +102,12 @@ analysis.clf <- function(.data,
                          call = NULL,
                          pos = TRUE, neg = FALSE) {
 
-  # Helper function for extracting the expression.
-  .get.expr <- function(.obj) {
-    # Format:
-    # method(formula, data = .data, params = params)
-    .method <- class(.obj)[[1]]
-    .formula <- deparse(.obj$formula)
-    .source <- deparse(substitute(.data, env = parent.frame()))
-    if (exists("family", where = params)) {
-      .family <- .obj$family$family
-      fmt.expr <- "%s(formula = %s, family = %s, data = %s)"
-      obj.expr <- sprintf(fmt.expr, .method, .formula, .family, .source)
-    } else {
-      fmt.expr <- "%s(formula = %s, data = %s)"
-      obj.expr <- sprintf(fmt.expr, .method, .formula, .source)
-    }
-    return(obj.expr)
-  }
-
   # Fit and summarize a model.
   baseline <- fit.model(
-    .data,
+    quote(.data),
     algorithm = algorithm,
     params = params)
   clf <- baseline$obj
-  clf$call <- .get.expr(baseline$obj)
   clf_summary <- summarize.model(clf)
 
   # Calculate table.

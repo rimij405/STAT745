@@ -585,6 +585,9 @@ environment with the name provided to the \texttt{target\ =} argument.
 over the previous report, it now incorporates an assessment of feature
 correlations.}
 
+\hypertarget{response-encoding}{%
+\subsubsection{Response Encoding}\label{response-encoding}}
+
 \begin{Shaded}
 \begin{Highlighting}[]
 \CommentTok{\# Recode the response.}
@@ -616,6 +619,17 @@ correlations.}
 ##                  
 ## 
 \end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{truth }\OtherTok{\textless{}{-}}\NormalTok{ (liver}\SpecialCharTok{$}\NormalTok{severity }\SpecialCharTok{==} \StringTok{"Severe"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\newpage
+
+\hypertarget{feature-correlations}{%
+\subsubsection{Feature Correlations}\label{feature-correlations}}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -661,6 +675,199 @@ The data behind the above correlation plot is provided below:
 ## drinks   0.3127 0.10080 0.20685  0.2796  0.3412 1.0000
 \end{verbatim}
 
+\hypertarget{baseline-model-analysis}{%
+\subsubsection{Baseline Model Analysis}\label{baseline-model-analysis}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# }\AlertTok{TODO}\CommentTok{: Replace glm with lda model.}
+\NormalTok{liver.baseline }\OtherTok{\textless{}{-}} \FunctionTok{analysis.clf}\NormalTok{(}
+\NormalTok{  liver, truth,}
+  \AttributeTok{algorithm =}\NormalTok{ glm,}
+  \AttributeTok{params =} \FunctionTok{list}\NormalTok{(}
+    \AttributeTok{formula =}\NormalTok{ severity }\SpecialCharTok{\textasciitilde{}}\NormalTok{ .,}
+    \AttributeTok{family =} \StringTok{"binomial"}
+\NormalTok{  ),}
+  \AttributeTok{pos =} \StringTok{"Severe"}\NormalTok{, }\AttributeTok{neg =} \StringTok{"Not Severe"}
+\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Summary of baseline model: 
+## 
+## Call:
+## "glm(formula = severity ~ ., family = binomial, data = liver)"
+## 
+## Deviance Residuals: 
+##    Min      1Q  Median      3Q     Max  
+## -1.964  -0.965  -0.591   1.048   2.419  
+## 
+## Coefficients:
+##             Estimate Std. Error z value Pr(>|z|)    
+## (Intercept) -5.99026    2.68546   -2.23  0.02571 *  
+## blood.1      0.06398    0.02964    2.16  0.03090 *  
+## blood.2      0.01953    0.00676    2.89  0.00387 ** 
+## blood.3      0.06411    0.01230    5.21  1.9e-07 ***
+## blood.4     -0.12320    0.02427   -5.08  3.9e-07 ***
+## blood.5     -0.01895    0.00560   -3.38  0.00072 ***
+## drinks       0.06808    0.04038    1.69  0.09179 .  
+## ---
+## Signif. codes:  
+## 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## (Dispersion parameter for binomial family taken to be 1)
+## 
+##     Null deviance: 469.47  on 344  degrees of freedom
+## Residual deviance: 411.01  on 338  degrees of freedom
+## AIC: 425
+## 
+## Number of Fisher Scoring iterations: 5
+\end{verbatim}
+
+\begin{verbatim}
+## Baseline classification table: 
+## Baseline model error rate: 
+##                     0.3304 
+##             truth
+## predictions  Not Severe Severe
+##   Not Severe        129     43
+##   Severe             71    102
+\end{verbatim}
+
+\begin{center}\includegraphics{figure/analysis-glm-optimal-error-1} \end{center}
+
+\begin{verbatim}
+## Misclassification table using optimal threshold: 
+## Number of cases in table: 345 
+## Number of factors: 2 
+## Test for independence of all factors:
+##  Chisq = 57, df = 1, p-value = 4e-14
+##                    truth
+## optimal_predictions Not Severe Severe
+##          Not Severe        170     68
+##          Severe             30     77
+\end{verbatim}
+
+\newpage
+
+\hypertarget{cross-validation-analysis}{%
+\subsection{Cross-Validation Analysis}\label{cross-validation-analysis}}
+
+\hypertarget{fold-cv}{%
+\subsubsection{10-fold CV}\label{fold-cv}}
+
+\begin{verbatim}
+## ---------------------------
+## Performing 10-fold CV:
+## # Samples: 345
+## # Thresholds: 100
+## # k folds: 10 || # rounds: 100
+## ---------------------------
+## tibble [100 x 4] (S3: tbl_df/tbl/data.frame)
+##  $ total.err : num [1:100] 0.58 0.57 0.566 0.562 0.558 ...
+##  $ ci.low    : num [1:100] 0.575 0.565 0.561 0.557 0.552 ...
+##  $ ci.high   : num [1:100] 0.585 0.575 0.572 0.567 0.563 ...
+##  $ thresholds: num [1:100] 0 0.0101 0.0202 0.0303 0.0404 ...
+## tibble [300 x 4] (S3: tbl_df/tbl/data.frame)
+##  $ thresholds: num [1:300] 0 0 0 0.0101 0.0101 ...
+##  $ category  : chr [1:300] "total.err" "ci.low" "ci.high" "total.err" ...
+##  $ error     : num [1:300] 0.58 0.575 0.585 0.57 0.565 ...
+##  $ linetype  : logi [1:300] TRUE FALSE FALSE TRUE FALSE FALSE ...
+## ---------------------------
+## Calculating 10-fold CV table:
+## # Samples: 345
+## # Threshold: 1
+## # k folds: 10 || # rounds: 100
+## ---------------------------
+##                       Length Class  Mode   
+## results                  2   -none- list   
+## plot                     2   -none- list   
+## optimal_threshold        1   -none- numeric
+## confusion_mat         4000   -none- numeric
+## confusion_mat_summary    2   -none- list
+\end{verbatim}
+
+\begin{center}\includegraphics{figure/analysis-glm-10cv-plot-1} \end{center}
+
+\begin{verbatim}
+## $plot
+## 
+## $optimal_threshold
+## [1] 0.5253
+\end{verbatim}
+
+\begin{verbatim}
+## Optimal threshold: 0.525252525252525
+## $mean
+##        [,1]  [,2]
+## [1,] 167.79 73.12
+## [2,]  32.21 71.88
+## 
+## $sterr
+##        [,1]   [,2]
+## [1,] 0.2061 0.1876
+## [2,] 0.2061 0.1876
+\end{verbatim}
+
+\newpage
+
+\hypertarget{fold-cv-1}{%
+\subsubsection{3-fold CV}\label{fold-cv-1}}
+
+\begin{verbatim}
+## ---------------------------
+## Performing 3-fold CV:
+## # Samples: 345
+## # Thresholds: 100
+## # k folds: 3 || # rounds: 100
+## ---------------------------
+## tibble [100 x 4] (S3: tbl_df/tbl/data.frame)
+##  $ total.err : num [1:100] 0.58 0.57 0.566 0.561 0.557 ...
+##  $ ci.low    : num [1:100] 0.575 0.566 0.562 0.557 0.553 ...
+##  $ ci.high   : num [1:100] 0.584 0.575 0.571 0.566 0.562 ...
+##  $ thresholds: num [1:100] 0 0.0101 0.0202 0.0303 0.0404 ...
+## tibble [300 x 4] (S3: tbl_df/tbl/data.frame)
+##  $ thresholds: num [1:300] 0 0 0 0.0101 0.0101 ...
+##  $ category  : chr [1:300] "total.err" "ci.low" "ci.high" "total.err" ...
+##  $ error     : num [1:300] 0.58 0.575 0.584 0.57 0.566 ...
+##  $ linetype  : logi [1:300] TRUE FALSE FALSE TRUE FALSE FALSE ...
+## ---------------------------
+## Calculating 3-fold CV table:
+## # Samples: 345
+## # Threshold: 1
+## # k folds: 3 || # rounds: 100
+## ---------------------------
+##                       Length Class  Mode   
+## results                  2   -none- list   
+## plot                     2   -none- list   
+## optimal_threshold        1   -none- numeric
+## confusion_mat         1200   -none- numeric
+## confusion_mat_summary    2   -none- list
+\end{verbatim}
+
+\begin{center}\includegraphics{figure/analysis-glm-3cv-plot-1} \end{center}
+
+\begin{verbatim}
+## $plot
+## 
+## $optimal_threshold
+## [1] 0.5354
+\end{verbatim}
+
+\begin{verbatim}
+## Optimal threshold: 0.535353535353535
+## $mean
+##        [,1]  [,2]
+## [1,] 167.95 76.41
+## [2,]  32.05 68.59
+## 
+## $sterr
+##        [,1]   [,2]
+## [1,] 0.3279 0.2899
+## [2,] 0.3279 0.2899
+\end{verbatim}
+
 \newpage
 
 \hypertarget{session-information}{%
@@ -700,7 +907,7 @@ relative to the project root.}
 ## loaded via a namespace (and not attached):
 ##  [1] highr_0.9        jquerylib_0.1.4  compiler_4.1.1  
 ##  [4] pillar_1.6.3     iterators_1.0.13 tools_4.1.1     
-##  [7] bit_4.0.4        digest_0.6.28    corrplot_0.90   
+##  [7] corrplot_0.90    bit_4.0.4        digest_0.6.28   
 ## [10] jsonlite_1.7.2   evaluate_0.14    lifecycle_1.0.1 
 ## [13] tibble_3.1.5     gtable_0.3.0     pkgconfig_2.0.3 
 ## [16] rlang_0.4.11     cli_3.0.1        rstudioapi_0.13 
@@ -709,11 +916,12 @@ relative to the project root.}
 ## [25] generics_0.1.0   vctrs_0.3.8      bit64_4.0.5     
 ## [28] rprojroot_2.0.2  grid_4.1.1       tidyselect_1.1.1
 ## [31] glue_1.4.2       here_1.0.1       R6_2.5.1        
-## [34] fansi_0.5.0      vroom_1.5.5      tzdb_0.1.2      
-## [37] readr_2.0.2      purrr_0.3.4      scales_1.1.1    
-## [40] codetools_0.2-18 htmltools_0.5.2  ellipsis_0.3.2  
-## [43] colorspace_2.0-2 renv_0.14.0      utf8_1.2.2      
-## [46] stringi_1.7.5    munsell_0.5.0    crayon_1.4.1
+## [34] fansi_0.5.0      vroom_1.5.5      farver_2.1.0    
+## [37] tzdb_0.1.2       readr_2.0.2      purrr_0.3.4     
+## [40] scales_1.1.1     codetools_0.2-18 htmltools_0.5.2 
+## [43] ellipsis_0.3.2   colorspace_2.0-2 renv_0.14.0     
+## [46] utf8_1.2.2       stringi_1.7.5    munsell_0.5.0   
+## [49] crayon_1.4.1
 \end{verbatim}
 
 \end{document}
