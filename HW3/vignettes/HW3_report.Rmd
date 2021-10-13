@@ -150,7 +150,10 @@ In this assignment we will:
 
 ```{r analysis-setup, echo=TRUE, message=TRUE}
 # Import the dataset as variable called "Liver".
-setup.analysis(target = "Liver")
+invisible(setup.analysis(target = "Liver"))
+```
+```{r analysis-preview, echo=FALSE}
+str(liver)
 ```
 
 The `setup.analysis()` function imports a dataset into the global environment with the name provided to the `target =` argument.
@@ -172,9 +175,6 @@ truth <- (liver$severity == "Severe")
 summary(truth)
 ```
 
-<!-- PAGE BREAK -->
-\newpage
-
 ```{r analysis-eda-distributions, eval=FALSE, include=FALSE}
 liver.qq.data <- liver %>% tidyr::pivot_longer(drinks, 
                                                names_to = "feature", 
@@ -190,6 +190,9 @@ ggplot(liver.qq.data, aes(sample = values)) +
   )
 
 ```
+
+<!-- PAGE BREAK -->
+\newpage
 
 ### Feature Correlations
 
@@ -222,8 +225,7 @@ The data behind the above correlation plot is provided below:
 println("Feature correlation matrix: ")
 print(liver.corrplot$corr)
 ```
-
-## Model Analysis
+## Model Analysis {.tabset}
 
 Models will be tracked using a named list `MODELS`:
 
@@ -246,14 +248,14 @@ MODELS$. <- fit.model(quote(liver), algorithm = lda, formula = .FORMULA)
 model <- MODELS$.
 ```
 
-```{r analysis-lda-baseline-summary}
+```{r analysis-lda-baseline-summary, echo=FALSE}
 # Save listing of attributes.
 model$summary <- summarize.model(model$obj)
 println("Baseline LDA Summary:")
 print(model$obj) # show summary.
 ```
 
-```{r analysis-lda-baseline-table}
+```{r analysis-lda-baseline-table, echo=FALSE}
 model$predict <- predict(model$obj, liver)
 model$table <- table(model$predict$class, liver$severity)
 model$error <- calc.error.rate(model$table)
@@ -268,44 +270,62 @@ println("\nTotal misclassified:", model$total_miss, sep = " ")
 MODELS$. <- model
 ```
 
-### Optimal Prior Probability (on Positive Class)
+### Optimal Priors (for Total Error Rate)
 
-```{r analysis-lda-baseline-optimal}
-model$optimal_priors <- calc.optimal.priors()
+We can calculate the model that minimizes the total error rate while explicitly setting the prior probability for the positive class. As a reminder:
+
+$$
+p = P(\text{ Severe }),\, q = (1 - p) = P(\text{Not Severe})
+$$
+
+```{r analysis-lda-optimal-error-fit}
+# Prepare next analysis.
+MODELS$min_error <- LDA.ANALYSIS$calc.optimal.prior.error.rates(
+  liver, truth,
+  formula = severity ~ .,
+  from = 0.001, to = 0.999, m = 25,
+  minimize_cost = FALSE, penalty = 10
+)
 ```
 
-
-
-
-```{r analysis-lda-weighted, include=FALSE}
-# Fit model with high cost of misclassification (favoring "Severe")
-cost10 <- calc.priors(liver, truth, weight = 10)
-model.cost <- fit.model(.data = quote(liver), 
-                        algorithm = MASS::lda,
-                        formula = severity ~ .,
-                        prior = cost10$priors)$obj
-print(model.cost)
+```{r analysis-lda-optimal-error-summary, echo=FALSE}
+model <- MODELS$min_error$optimal
+println("---------------------------")
+print(model$obj)
+printf("Total cost of misclassification (Penalty x%s): %0.2f", 
+       model$penalty, model$cost)
+printf("Total error rate (%s misclassifications): %0.2f", 
+       model$miss, model$error)
 ```
-```{r analysis-lda-weighted-table, include=FALSE}
-# Make predictions with baseline LDA model.
-println("\nWeighted (x10 Cost) misclassification table: ")
-model.cost$predict <- predict(model.cost, liver)
-model.cost$miss <- (model.cost$predict$class != liver$severity)
-(model.cost$table <- table(model.cost$predict$class, liver$severity))
-println("\nTotal misclassified:", sum(model.cost$miss), sep = " ")
+```{r analysis-lda-optimal-error-table, echo=FALSE}
+model$table <- table(model$predict$class, liver$severity)
+print(model$table)
+println("---------------------------")
+
+# Save the model.
+MODELS$min_error$optimal <- model
 ```
 
-```{r analysis-lda-optimal-error, fig.width=10, fig.size=8, echo=FALSE}
-print(liver.baseline$plot)
-println("Misclassification table using optimal threshold: ")
-summary(liver.baseline$optimal_table)
-print(liver.baseline$optimal_table)
+### Optimal Priors (for Total Cost)
+
+Notice the current "cost" is a penalty factor of `r MODELS$min_error$penalty`. The `penalty` value is a ratio that can be used to scale how a misclassification for the positive class affects the model.
+
+We can also minimize our model based on the total cost. The following plots summarize both scenarios:
+
+```{r analysis-lda-optimal-plot, fig.width=10, fig.size=8, echo=FALSE}
+# Make error and cost plots.
+errors_df <- MODELS$min_error$errors
+penalty <- MODELS$min_error$penalty
+print(LDA.ANALYSIS$plot.optimal.error.rates(errors_df, penalty = penalty)$p)
+print(LDA.ANALYSIS$plot.optimal.error.rates(errors_df, penalty = penalty, minimize_cost = TRUE)$p)
 ```
 
 <!-- PAGE BREAK -->
 \newpage
 
 ## Cross-Validation Analysis {.tabset}
+
+> This section is a revision of the logistic regression CV. I was unable to complete the LDA CV analysis but I had reworked this analysis from my previous report in order to better understand how to accomplish the assignment. I hope to submit a revision before solutions are released for homework 3; the work is simply in progress.
 
 ### 10-fold CV
 

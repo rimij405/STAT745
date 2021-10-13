@@ -88,6 +88,7 @@ attach.deps <- function() {
   library(foreach)
   library(ggplot2)
   library(forcats)
+  library(tibble)
   library(tidyr)
   library(dplyr)
 }
