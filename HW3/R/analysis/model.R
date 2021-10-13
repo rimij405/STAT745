@@ -4,10 +4,11 @@
 
 ## ---- analysis::model::constants ----
 
+# Create a MODEL pointer in the global scope.
 MODEL <<- vector("list", 0L)
 
-# Default settings for the fit.model function.
-.DEFAULTS <- list(
+# Default settings for the model script.
+.MODEL <- list(
   formula = Y ~ .,
   family = "binomial"
 )
@@ -18,80 +19,66 @@ MODEL <<- vector("list", 0L)
 #'
 #' @param .data Training dataset.
 #' @param FUN algorithm to execute.
-#' @param ... Model parameters to pass into the algorithm (Takes precedence over `params`).
-#' @param params Model parameters to pass into the algorithm.
+#' @param ... Model parameters to pass into the algorithm.
+#' @param params Model parameters to pass into the algorithm. Only active when `...` is not provided.
 #'
 #' @return Model object.
 #' @export
-.fit.model <- function(.data, FUN = glm, ..., params = list(formula = .DEFAULTS$formula, family = .DEFAULTS$family)) {
-  # Get the model summary to replace the expanded call.
-  # model_expr <- sprintf("%s", deparse1(sys.call()))
-  # model_expr <- gsub("\"", "'", model_expr)
-  # model_expr <- gsub("", "", model_expr)
+.fit.model <- function(.data, FUN = glm, ..., params = NULL, silent = FALSE) {
 
-  # Get the model params.
-  model_params <- params
-  model_params <- modifyList(model_params, list(...), keep.null = FALSE)
-  model_params <- modifyList(model_params, list(data = substitute(.data, env = environment())))
-  # print(substitute(.data, env = environment()))
+  # Get the ... arguments.
+  arguments <- list(...)
+  if ((length(arguments) > 0) && (exists("params") && !is.null(params) && length(params) > 0)) {
+    if (!silent) {
+      warning("Conflicting model arguments provided.")
+      warning("The `params` list is ignored when `...` arguments are passed directly.")
+      warning("Please choose one method of specifying model arguments.")
+    }
+  }
+
+  if (length(arguments) > 0) {
+    model_params <- list(...)
+  } else if (exists("params") && (!is.null(params)) && (length(params) > 0)) {
+    model_params <- params
+  } else {
+    if (!silent) {
+      message("No model parameters specified. Using default model arguments.")
+      message(sprintf("Default parameters: %s", deparse(.MODEL)))
+    }
+    model_params <- .MODEL
+  }
+
+  if (exists("data", where = model_params) && !silent) {
+    warning("Conflicting training data source provided.")
+    warning("Data passed into the `params` list are ignored.")
+  }
+
+  # Add the data argument.
+  model_params <- modifyList(model_params, list(data = .data))
 
   # Execute the model.
   model_obj <- do.call(deparse(substitute(FUN)), args = model_params, quote = FALSE)
-  # model_obj$call <- model_expr
-  # Return the model object.
   return(model_obj)
 }
 
-#' stop("a")
+#' Summarize a model.
 #'
-#' #' Fit a model.
-#' #'
-#' #' @param .data Dataset.
-#' #' @param algorithm Model fitting function.
-#' #' @param formula Formula used to fit the model.
-#' #' @param ... Additional model parameters.
-#' #'
-#' #' @return Fit model object.
-#' fit.model <- function(.data,
-#'                       algorithm = MODEL$.,
-#'                       params = list(), ...) {
+#' @param .obj Model to summarize.
+#' @param show [TRUE] Display summary immediately?
 #'
-#'   # Get summary and replace the expanded $call.
-#'   model_expr <- sprintf("%s", deparse1(sys.call()))
-#'   model_expr <- gsub("\"", "'", model_expr)
-#'   model_expr <- gsub("", "", model_expr)
-#'   # print(model_expr)
-#'
-#'   # Prepare algorithm arguments.
-#'   # - data is always ovewritten to .data
-#'   # - params is of least priority.
-#'   # - ... parameters overwrite anything in params.
-#'   model_args <- list( ) # Empty list to begin.
-#'   model_args <- modifyList(model_args, params, keep.null = TRUE) # Allows us to mark params as NULL.
-#'   model_args <- modifyList(model_args, list(...), keep.null = TRUE) # Allows us to mark params as NULL.
-#'   model_args <- modifyList(model_args, list(data = .data)) # Ensures our data param is .data always.
-#'   model_obj <- do.call(algorithm, args = model_args)
-#'
-#'   # model_obj$call <- model_expr
-#'   return(list(
-#'     obj = model_obj,
-#'     expr = model_expr
-#'   ))
-#'
-#' }
-#'
-#' #' Summarize a fit model.
-#' #'
-#' #' @param .obj A fitted model object.
-#' #'
-#' #' @return Fit model results.
-#' summarize.model <- function(.obj) {
-#'
-#'   model_summary <- summary(.obj)
-#'   return(model_summary)
-#'
-#' }
+#' @return summary of model object.
+.summarize.model <- function(.obj, show = TRUE) {
+  .summary <- summary(.obj)
+  if (show) {
+    writeLines("-----------------------------------")
+    cat(deparse(.obj$call), sep = "\n")
+    cat(deparse(.obj$terms), sep = "\n")
+    writeLines("-----------------------------------")
+  }
+  return(.summary)
+}
 
 ## ---- analysis::model::exports ----
 
 MODEL$fit <- .fit.model
+MODEL$summarize <- .summarize.model

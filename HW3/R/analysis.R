@@ -10,8 +10,8 @@ ANALYSIS <<- vector("list", 0L)
 .paths <- list(
   setup = here::here("R/analysis/setup.R"),
   eda = here::here("R/analysis/eda.R"),
-  model = here::here("R/analysis/model.R")
-  # metrics = here::here("R/analysis/metrics.R"),
+  model = here::here("R/analysis/model.R"),
+  metrics = here::here("R/analysis/metrics.R")
   # validation = here::here("R/analysis/validation.R"),
   # lda = here::here("R/analysis/lda.R")
 )
@@ -37,6 +37,9 @@ source.submodule(files = .paths)
 ANALYSIS$paths <- .paths         # From R/analysis.R
 ANALYSIS$setup <- setup.analysis # From R/analysis/setup.R
 
+# Import functions from MODEL.
+ANALYSIS <- modifyList(ANALYSIS, MODEL)
+ANALYSIS <- modifyList(ANALYSIS, METRICS)
 
 # Use source(here::here("R/analysis.R")) to activate ANALYSIS.
 

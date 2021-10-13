@@ -4,12 +4,18 @@
 
 ## ---- utils::constants ----
 
-# Collection of submodules that will be imported.
-UTILS <- list(
+# Create a UTILS pointer in the global scope.
+UTILS <<- vector("list", 0L)
+
+# Default settings for the utils.R script.
+.UTILS <- list(
     . = here::here("R/utils.R"),
     printf = here::here("R/utils/printf.R"),
     paths = here::here("R/utils/paths.R")
 )
+
+## ---- utils::defines ----
+
 
 .get.cached.modules <- function() {
   if (exists("CACHED_MODULES", envir = .GlobalEnv)) {
@@ -78,3 +84,6 @@ source.submodule <- function(files = UTILS, ..., verbose = FALSE, use_cache = TR
     message("No sourced files to import!")
   }
 }
+
+# Add filepaths to the main UTILS.
+UTILS <- modifyList(UTILS, .UTILS)
