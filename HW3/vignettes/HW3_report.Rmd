@@ -1,6 +1,6 @@
 ---
 # Document metadata information:
-title: "Homework 3 Report"
+title: "Homework 3 Report (OLD)"
 subtitle: Classification of liver malfunction severity (LDA)
 author: Ian Effendi \\ iae2784@rit.edu
 date: "`r format(Sys.time(), '%B %d, %Y')`"
