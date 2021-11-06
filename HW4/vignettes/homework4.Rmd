@@ -1,0 +1,197 @@
+---
+title: "Homework 4"
+subtitle: "Classification of liver malfunction severity (Random Forest)"
+author: "Ian Effendi"
+date: "`r format(Sys.Date(), format='%B %d, %Y')`"
+output: 
+  # Output as a previewable HTML Notebook.
+  html_notebook:
+    theme: united
+    highlight: tango
+    df_print: paged
+    toc: true
+    toc_depth: 2
+  # Output as an rmarkdown::pdf_document()
+  pdf_document:
+    keep_tex: true
+    highlight: tango
+    fig_caption: true
+    df_print: kable
+    toc: true
+    toc_depth: 3
+# pandoc -> pdfLaTeX rendering options:
+fontsize: 11pt
+geometry:
+  - margin=1in
+  - heightrounded
+documentclass: scrartcl
+papersize: a4
+urlcolor: violet
+toccolor: blue
+---
+
+## Certification
+
+> I certify that I indeed finished reading Ch. 5 from *An Introduction to Statistical Learning*, by James Gareth, Daniela Witten, Trevor Hastie, Robert Tibshirani.
+
+```{r setup, include=FALSE}
+# Set the root directory.
+knitr::opts_knit$set(root.dir = here::here(""))
+
+# Set the chunk options.
+knitr::opts_chunk$set(
+    ## ---- Formatting Options ----
+    comment = "",
+    include = TRUE,
+    collapse = TRUE,
+    echo = TRUE,
+    strip.white = TRUE,
+    
+    ## ---- Output Options ----
+    message = TRUE,
+    warning = TRUE,
+    error = TRUE,
+    results = 'markup',
+    
+    ## ---- Display Options ----
+    fig.height = 8,
+    fig.width = 6
+)
+```
+
+## Environment Setup
+
+The usual steps are taken to setup our work environment. We start by importing the necessary libraries into the `R` namespace:
+
+```{r import-packages, include=TRUE, echo=TRUE, message=FALSE, warning=FALSE, error=FALSE, results='hide'}
+# Import the packages necessary for this analysis.
+library(MASS)
+library(magrittr)
+library(ggplot2)
+library(dplyr)
+library(readr)
+library(here)
+```
+
+We can then follow up by importing our data. An external script, `data-raw/Liver.R` handles importing the original `Liver.txt`, converting it into a `tbl_df` with the appropriate column names and types, and saving some additional intermediate structures.
+
+We load the following from the project `data/` directory:
+
+- `Liver`: a `tbl_df` containing 6 features and 1 response column.
+- `Liver.features`: a column subset of `Liver` containing only features.
+- `Liver.truth`: a ground truth logical derived from `Liver$severity`. (`TRUE = "Severe"`)
+- `Liver.labels`: a ground truth set of factors with class labels instead of logical values.
+
+```{r import-data, results='hold'}
+# External script handles preprocessing Liver into a properly typed data.frame.
+source(here("data-raw/Liver.R"))
+
+# Read the data into memory.
+Liver <- read_rds(here("data/Liver.rds"))
+Liver.features <- read_rds(here("data/Liver.features.rds"))
+Liver.truth <- read_rds(here("data/Liver.truth.rds"))
+Liver.labels <- read_rds(here("data/Liver.labels.rds"))
+
+# Save some additional variables for later reuse.
+n_samples = nrow(Liver)
+n_features = ncol(Liver.features)
+```
+
+## Report
+
+In this assignment we will be comparing cross-validation results from `LDA` and `RandomForest` models.
+
+### 1. Cross-Validation of Linear Discriminant Analysis (LDA)
+
+#### Box-Cox Transformation
+
+```{r lda-boxcox}
+boxcox <- function() {}
+```
+
+
+#### $3$-fold CV, 100 Rounds
+
+```{r lda-cv-def}
+# Define the CV error function.
+lda.CV.error <- function(.data=Liver.df, .truth=Liver.truth, ..., k=3, m=100) {
+    # Prepare the cross-validation results matrix.
+    Cost <- matrix(0, m)
+    # Perform `m` rounds of cross-validation.
+    for (i in 1:m) {
+        # Sub-sample `k` folds.
+        fold = sample(rep(1:k, length = nrow(.data)))
+        for (j in 1:k) {
+            # Condition for selecting the `j`th fold.
+            subset.j <- (fold == j)
+            
+            # Split into train and test data.
+            train.j <- .data %>% subset(!subset.j)
+            test.j <- .data %>% subset(subset.j)
+            truth.j <- .truth %>% subset(subset.j)
+            
+            # Fit model.
+            model.j <- MASS::lda(Y ~ ., data = train.j)
+            preds.j <- predict(model.j, newdata = test.j)$class
+            
+            # Calculate the number misclassified:
+            falseneg.j <- sum((preds.j == FALSE) & (truth.j == TRUE))
+            falsepos.j <- sum((preds.j == TRUE) & (truth.j == FALSE))
+            misclassified.j <- falseneg.j + falsepos.j
+            
+            # Add total misclassified to round `i` total.
+            Cost[i] <- Cost[i] + misclassified.j
+        }
+    }
+    
+    # Calculate the average number of misclassified cases.
+    avg.Cost <- mean(Cost)
+    
+    # Calculate the standard error of total minimized
+    # error of misclassification.
+    stderr.Cost <- sd(Cost)/sqrt(length(Cost))
+    
+    # Return calculated values.
+    return(list(
+        Cost = Cost,
+        avg.Cost = avg.Cost,
+        stderr.Cost = stderr.Cost
+    ))
+}
+```
+
+
+```{r lda-cv3}
+# Prepare the data for the CV.
+Liver.df <- bind_cols(Liver.features, Y = Liver.truth)
+str(Liver.df)
+
+# Perform 3-fold, 100 Round CV.
+k3.m100.cv <- lda.CV.error(Liver.df, Liver.truth, k = 3, m = 100)
+str(k3.m100.cv)
+cat("Average misclassified cases using 3-fold CV (100 Rounds) = ", k3.m100.cv$avg.Cost, "\n")
+cat("Standard error of total minimized error of misclassification = ", k3.m100.cv$stderr.Cost, "\n")
+```
+
+#### $10$-fold CV, 100 Rounds
+
+### 2. Cross-Validation Results Compared to Lecture Evaluation of LDA
+
+### 3. Cross-Validation of Random Forest Classifier
+
+#### $10$-fold CV
+
+We will explore optimality and sensitivity to:
+
+- a choice of 10 random seeds (serving as 10 rounds).
+- `mtry`: the number of predictors randomly sampled as candidates for each split decision.
+- `nodesize`: the minimum size of terminal nodes.
+- `ntrees`: the number of trees, being 500 and 1000.
+
+### 4. Cross-Validation Results Compared to Lecture Evaluation of Random Forest
+
+- Graphs.
+
+- Std. Dev.
+
+### 5. Cross-Validation Results of Random Forest Compared to Cross-Validation Results of LDA
