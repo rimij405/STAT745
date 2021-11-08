@@ -10,7 +10,7 @@ output:
     highlight: tango
     df_print: paged
     toc: true
-    toc_depth: 2
+    toc_depth: 3
   # Output as an rmarkdown::pdf_document()
   pdf_document:
     keep_tex: true
@@ -97,24 +97,133 @@ n_samples = nrow(Liver)
 n_features = ncol(Liver.features)
 ```
 
-## Report
+## Overview
 
 In this assignment we will be comparing cross-validation results from `LDA` and `RandomForest` models.
 
-### 1. Cross-Validation of Linear Discriminant Analysis (LDA)
+## 1. Box-Cox Transformation of Liver Features
 
-#### Box-Cox Transformation
+### Box-Cox Transformation
 
-```{r lda-boxcox}
-boxcox <- function() {}
+We can produce a quantile plot to check the assumption of normal distribution for the predictors present in the Liver dataset, using the following function:
+
+```{r liver-norm-def}
+#' Create quantile plot for a feature vector.
+#' @param .vec Data containing the feature vector values.
+#' @param ... Graphing parameters.
+qqplot.feature <- function(.vec, ...) {
+    qqnorm(.vec, ...)
+    qqline(.vec, ...)
+}
+
+#' Create quantile plot of the data.frame for the specified predictors.
+#' 
+#' @param .data data.frame containing predictors.
+#' @param ... Graphing parameters.
+#' @param cols Predictors to select from the original dataset.
+qqplot.data <- function(.data, ..., cols = 1:6) {
+    labels = colnames(.data)
+    fig.x <- max(as.integer(max(cols) / 2), 2)
+    fig.y <- 2
+    cols <- if(is.null(cols)) 1:ncol(.data) else cols
+    par(mfrow=c(fig.x, fig.y))
+    for(i in cols){
+        main = paste0(c("Normal Q-Q Plot", labels[i]))
+        qqplot.feature(.data %>% pull(i), main = main, ...)
+    }
+}
 ```
 
+As shown below, `blood.1` is the only predictor that appears to already have a normal distribution. The remaining predictors to not fit the assumption of normality, and that can have an impact on the performance of our model.
 
-#### $3$-fold CV, 100 Rounds
+```{r liver-norm}
+# Plot the normal distributions for all features present in `Liver`.
+Liver %>% qqplot.data()
+```
+
+Not every predictor appears to adhere to a normal distribution, so performing a Box-Cox transformation should improve this. We can perform the transformation with the following function:
+
+```{r lda-boxcox-def}
+#' Perform a box-cox transformation.
+#' @param .features data.frame containing predictor variables.
+#' @param .response single-column data.frame containing response labels.
+boxcox.transform <- function(.features, .response) {
+    p <- ncol(.features)
+    features.transformed <- .features
+    Powers <- rep(NA, p)
+    for(i in 1:p) {
+        power.fit <- MASS::boxcox(.features[[i]] + 1 ~ .response, plotit = FALSE)
+        power.ind <- match(max(power.fit$y), power.fit$y)
+        Power.i <- power.fit$x[power.ind]
+        Powers[i] <- Power.i
+        if(Power.i == 0) {
+            features.transformed[[i]] <- log(.features[[i]] + 1)
+        } else {
+            features.transformed[[i]] <- ((.features[[i]] + 1)^Power.i)
+        }
+    }
+    return(list(
+        Powers = Powers,
+        features = features.transformed
+    ))
+}
+```
+
+Shown below are the results of the transformation on the features. The transformed features appear to be normally distributed, with the exception of `drinks`, which appears to have very influential leverage points:
+
+```{r lda-boxcox}
+# Perform the Box-Cox Transformation.
+transformation <- boxcox.transform(Liver.features, Liver.labels)
+
+# Display the calculated powers.
+cat("Box-Cox Transformation Powers: ", transformation$Powers, "\n")
+
+# Display the transformed features.
+transformation$features %>% qqplot.data()
+```
+
+## 2. Cross-Validation of Linear Discriminant Analysis (LDA) {.tabset}
+
+We can take our transformed data and preprae a `data.frame` for use in our cross-validation processes:
+
+```{r lda-prepare}
+# Create data.frame from transformation features.
+Liver.boxcox.df <- bind_cols(transformation$features, Y = Liver.truth)
+Liver.boxcox.df
+```
+
+The following functions will perform $k$-fold cross-validation using the `lda` model provided by the `MASS` package.
 
 ```{r lda-cv-def}
-# Define the CV error function.
-lda.CV.error <- function(.data=Liver.df, .truth=Liver.truth, ..., k=3, m=100) {
+#' Calculate accuracy.
+#' @param mat 2 by 2 matrix containing confusion matrix values.
+calc.accuracy <- function(mat) {
+    return(sum(diag(mat)) / sum(mat))
+}
+
+#' Calculate misclassification error.
+#' @param mat 2 by 2 matrix containing confusion matrix values.
+calc.error <- function(mat) {
+    return(1 - calc.accuracy(mat))
+}
+
+#' Calculate the confidence interval
+#' @param avg Average value.
+#' @param stderr Standard error of value.
+calc.confint <- function(avg, stderr) {
+    return(list(
+        lower = avg - stderr,
+        upper = avg + stderr
+    ))
+}
+
+#' Perform k-fold LDA Cross-Validation
+#' @param .data data.frame with features and response in column "Y".
+#' @param .truth vector containing ground truth/labels.
+#' @param ... Additional params.
+#' @param k Number of folds.
+#' @param m Number of rounds.
+lda.CV.error <- function(.data, .truth, ..., k=3, m=100) {
     # Prepare the cross-validation results matrix.
     Cost <- matrix(0, m)
     # Perform `m` rounds of cross-validation.
@@ -140,6 +249,7 @@ lda.CV.error <- function(.data=Liver.df, .truth=Liver.truth, ..., k=3, m=100) {
             misclassified.j <- falseneg.j + falsepos.j
             
             # Add total misclassified to round `i` total.
+            # and add the error rate.
             Cost[i] <- Cost[i] + misclassified.j
         }
     }
@@ -147,39 +257,116 @@ lda.CV.error <- function(.data=Liver.df, .truth=Liver.truth, ..., k=3, m=100) {
     # Calculate the average number of misclassified cases.
     avg.Cost <- mean(Cost)
     
-    # Calculate the standard error of total minimized
-    # error of misclassification.
+    # Calculate the standard error of misclassified cases.
     stderr.Cost <- sd(Cost)/sqrt(length(Cost))
+    
+    # Calculate the confidence interval of misclassified cases.
+    confint.Cost <- calc.confint(avg.Cost, stderr.Cost)
+    
+    # Calculate the average error rate.
+    avg.Error <- mean(Cost/nrow(.data))
+    
+    # Calculate the standard error of the average error rate.
+    stderr.Error <- sd(Cost/nrow(.data))/sqrt(length(Cost))
+    
+    # Calculate the confidence interval for the error.
+    confint.Error <- calc.confint(avg.Error, stderr.Error)
     
     # Return calculated values.
     return(list(
+        k = k,
+        m = m,
         Cost = Cost,
         avg.Cost = avg.Cost,
-        stderr.Cost = stderr.Cost
+        stderr.Cost = stderr.Cost,
+        confint.Cost = confint.Cost,
+        avg.Error = avg.Error,
+        stderr.Error = stderr.Error,
+        confint.Error = confint.Error
     ))
 }
 ```
 
+We can display the results from our cross-validation fits using the following functions:
 
-```{r lda-cv3}
-# Prepare the data for the CV.
-Liver.df <- bind_cols(Liver.features, Y = Liver.truth)
-str(Liver.df)
+```{r lda-cv-summary-def}
 
-# Perform 3-fold, 100 Round CV.
-k3.m100.cv <- lda.CV.error(Liver.df, Liver.truth, k = 3, m = 100)
-str(k3.m100.cv)
-cat("Average misclassified cases using 3-fold CV (100 Rounds) = ", k3.m100.cv$avg.Cost, "\n")
-cat("Standard error of total minimized error of misclassification = ", k3.m100.cv$stderr.Cost, "\n")
+# Prepare formatters.
+int.format <- function(x) sprintf("%i", as.integer(x))
+float.format <- function(x) sprintf("%f", x)
+stderr.format <- function(x) sprintf("%.5f", x)
+rate.format <- function(x) sprintf("%.2f%%", x * 100)
+confint.format <- function(avg, stderr, lower, upper) sprintf("(%s +/- %s) = [%s, %s]", avg, stderr, lower, upper)
+label.CV.format <- function(k, m) sprintf("%s-fold CV (%s Rounds)", int.format(k), int.format(m))
+
+#' Summarize the results.
+#' @param results Results of call to `lda.CV.error()`.
+lda.CV.summary <- function(results) {
+    # Get the label.
+    label <- label.CV.format(results$k, results$m)
+    cat(sprintf("[%s] Average misclassified cases = %.2f", label, results$avg.Cost), "\n")
+    cat(sprintf("[%s] Standard error of total misclassified cases = +/- %s", label, stderr.format(results$stderr.Cost)), "\n")
+    cat(sprintf("[%s] 95%% Confidence Interval for misclassified cases = %s", label, confint.format(float.format(results$avg.Cost), stderr.format(results$stderr.Cost), float.format(results$confint.Cost$lower), float.format(results$confint.Cost$upper))), "\n")
+    
+    cat(sprintf("[%s] Average error rate = %s", label, rate.format(results$avg.Error)), "\n")
+    cat(sprintf("[%s] Standard error of total error rate = +/- %s", label, rate.format(results$stderr.Error)), "\n")
+    cat(sprintf("[%s] 95%% Confidence Interval for error rate = %s", label, confint.format(rate.format(results$avg.Error), rate.format(results$stderr.Error), rate.format(results$confint.Error$lower), rate.format(results$confint.Error$upper))), "\n")
+}
 ```
 
-#### $10$-fold CV, 100 Rounds
+### $3$-fold CV, 100 Rounds
 
-### 2. Cross-Validation Results Compared to Lecture Evaluation of LDA
+```{r lda-cv3}
+# Perform 3-fold, 100 Round CV.
+k3.m100.cv <- lda.CV.error(Liver.boxcox.df, Liver.truth, k = 3, m = 100)
+# str(k3.m100.cv)
+lda.CV.summary(k3.m100.cv)
+```
 
-### 3. Cross-Validation of Random Forest Classifier
+### $10$-fold CV, 100 Rounds
 
-#### $10$-fold CV
+```{r lda-cv10}
+# Perform 10-fold, 100-Round CV.
+k10.m100.cv <- lda.CV.error(Liver.boxcox.df, Liver.truth, k = 10, m = 100)
+# str(k10.m100.cv)
+lda.CV.summary(k10.m100.cv)
+```
+
+### Whole Learning Sample Model
+
+The lecture material used the transformed whole learning sample to fit an LDA model. Fitting that model on the whole learning sample produces the following results:
+
+```{r lda-lecture}
+review.lda <- new.env(parent = emptyenv())
+review.lda$X <- transformation$features
+review.lda$Y <- Liver.truth
+review.lda$FitObj <- lda(review.lda$X, review.lda$Y)
+review.lda$PredObj <- predict(review.lda$FitObj, review.lda$X)
+review.lda$Table <- table(review.lda$PredObj$class, review.lda$Y)
+review.lda$FitObj
+review.lda$Table
+cat(sprintf("Error rate from lecture: %.5f%%", calc.error(review.lda$Table) * 100), "\n")
+```
+The lecture's model has an error rate of $\approx 25.22$%. The lecture's error rate is the *training* error rate, whereas our $k$-fold CV is the *validation* error rate.
+
+This is in comparison with the results from the $100$ rounds $3$-fold CV and $100$ rounds $10$-fold CV:
+
+- The average error rate from the $3$-fold CV LDA is $\approx 26.88$%.
+- The average error rate from the $10$-fold CV LDA is $\approx 26.92$%.
+
+So why the slight increase in error rate (and consequently, a decrease in model accuracy)? It's more likely that $k$-fold CV is giving a better approximation for the model's accuracy on this dataset, as it is less prone to overfitting.
+
+## 4. Cross-Validation of Random Forest Classifier {.tabset}
+
+The `RandomForest` classifier <!-- TODO: INSERT DESCRIPTION -->. In `R`, we use the `randomForest()` function, an implementation of Leo Breiman's random forest algorithm.
+
+```{r rf-setup}
+# Import the randomForest function.
+library(randomForest)
+# Create data.frame from transformation features.
+Liver.df <- bind_cols(Liver.features, Y = Liver.labels)
+Liver.df
+```
 
 We will explore optimality and sensitivity to:
 
@@ -188,10 +375,188 @@ We will explore optimality and sensitivity to:
 - `nodesize`: the minimum size of terminal nodes.
 - `ntrees`: the number of trees, being 500 and 1000.
 
-### 4. Cross-Validation Results Compared to Lecture Evaluation of Random Forest
+```{r forest-cv-def}
+#' Calculate table accuracy.
+calc.table.accuracy <- function(arr) {
+    return(calc.accuracy(arr[,1:2]))
+}
 
-- Graphs.
+#' Calculate table error.
+calc.table.error <- function(arr) {
+    return(calc.error(arr[,1:2]))
+}
 
-- Std. Dev.
+#' Perform k-fold Random Forest Cross-Validation
+#' @param .data data.frame with features and response in column "Y".
+#' @param .truth vector containing ground truth/labels.
+#' @param ... Additional params.
+#' @param k Number of folds.
+#' @param m Number of seeds. Equivalent to number of rounds.
+#' @param mtry Number of variables randomly sampled as candidates for each split.
+#' @param nodesize Minimum size of the terminal nodes.
+#' @param ntrees Number of trees.
+rf.CV.error <- function(.data, .truth, ..., k=3, m=10, mtry=c(2:5), nodesize=c(1:10), ntree=500, init.seed=99) {
+    # Get the iterator sizes.
+    P <- length(mtry)
+    S <- length(nodesize)
+    
+    # Create an array that will store results for the models fit.
+    # m matrices of size r x c.
+    # Dimensions: [r,c,m,P,S]
+    # - r: Row index.
+    # - c: Column index.
+    # - m: Round index.
+    # - P: mtrys option index.
+    # - S: nodesizes option index.
+    Table.arr <- array(0, c(2,3,m,P,S))
+    
+    # Array is m matrices with 2 rows and 3 columns each.
+    n_samples <- nrow(.data)
+    n_features <- ncol(.data)
+    
+    # Perform m "Rounds", each with a different seed.
+    for(i in 1:m) {
+        
+        # Set the random seed for the Random Forest.
+        seed.i <- as.integer(init.seed + i)
+        set.seed(seed.i)
+        
+        # Perform a fit for each `mtry` option.
+        for(p in 1:P) {
+            
+            # Perform a fit for each `nodesize` option.
+            for(s in 1:S) {
+                
+                # Fold confusion array.
+                Fold.arr <- array(0, c(2,3,k))
 
-### 5. Cross-Validation Results of Random Forest Compared to Cross-Validation Results of LDA
+                # Sub-sample `k` folds.
+                fold = sample(rep(1:k, length = n_samples))
+                for (j in 1:k) {
+                    
+                    # Condition for selecting the `j`th fold.
+                    subset.j <- (fold == j)
+                    
+                    # Split into train and test data.
+                    train.j <- .data %>% subset(!subset.j)
+                    test.j <- .data %>% subset(subset.j)
+                    truth.j <- .truth %>% subset(subset.j)
+                    
+                    # Subset features and response.
+                    X.train.j <- train.j %>% dplyr::select(-Y)
+                    Y.train.j <- train.j %>% dplyr::pull(Y)
+                    X.test.j <- test.j %>% dplyr::select(-Y)
+                    Y.test.j <- truth.j
+
+                    # Fit model.
+                    fit.j <- randomForest(X.train.j, Y.train.j, mtry=mtry[p], nodesize=nodesize[s], ntree=ntree)
+                    pred.j <- predict(fit.j, newdata = X.test.j)
+                    
+                    # Calculate the error rate for this particular model.
+                    table.j <- table(pred.j, truth.j)
+                    poserror.j <- table.j[1,2] / sum(table.j[1,])
+                    negerror.j <- table.j[2,1] / sum(table.j[2,])
+                    confusion.j <- cbind(table.j, c(poserror.j, negerror.j))
+
+                    # Add fold's confusion results.
+                    Fold.arr[,,j] <- Fold.arr[,,j] + confusion.j
+                }
+                
+                # Average folds to get Round confusion matrix.
+                Table.arr[,,i,p,s] <- apply(Fold.arr, 1:2, mean)
+                
+            }
+        }
+    }
+    
+    # Calculate the error rate for each 'Round'
+    Error.arr <- apply(Table.arr, c(3:5), calc.table.error)
+    
+    # Calculate the standard deviation of error rate per 'Round'.
+    sd.Error <- apply(Error.arr, 2:3, sd)
+    
+    # Calculate the mean error rate per 'Round'.
+    avg.Error <- apply(Error.arr, 2:3, mean)
+    
+    # Calculate the standard error.
+    stderr.Error <- sd.Error/sqrt(m)
+    
+    # Return metrics.
+    return(list(
+        k = k,
+        m = m,
+        ntree = ntree,
+        Table.arr = Table.arr,
+        Error.arr = Error.arr,
+        sd.Error = sd.Error,
+        avg.Error = avg.Error,
+        stderr.Error = stderr.Error
+    ))
+}
+```
+
+We can display the results from our cross-validation fits using the following functions:
+
+```{r forest-cv-summary-def}
+#' Summarize the results.
+#' @param results Results of call to `rf.CV.error()`.
+rf.CV.summary <- function(results) {
+    str(results)
+    label = paste0(sprintf("Random Forest (%i-fold CV, %i trees)", as.integer(results$k), as.integer(results$ntree)))
+    par(mar=c(6, 5, 5, 2)+0.1)
+    matplot(t(100 * results$avg.Error), type="l", xlab = "Node size", ylab = "Mean error of classification [%]", main = label)
+    matplot(t(100 * results$sd.Error), type="l", xlab = "Node size", ylab = "St.dev of error of classification [%]", main = label)
+    matplot(t(100 * results$stderr.Error), type="l", xlab = "Node size", ylab = "St.Error of mean classification error [%]", main = label)
+}
+```
+
+### $10$-fold CV. 500 Trees
+
+```{r forest-cv10-500, fig.width=8, fig.height=5}
+rf.cv1 <- new.env(parent = emptyenv())
+rf.cv1$filename <- here("data/rf.k10.t500.rds")
+if(file.exists(rf.cv1$filename)) {
+    message("File exists. Loading from cache...")
+    load(file=rf.cv1$filename)
+} else {
+    # Fit model and save to cache.
+    k10.t500 <- rf.CV.error(Liver.df, Liver.truth, k=5, m=10, mtry=c(2:5), nodesize=c(1:5), ntree=10, init.seed=1)
+    save(k10.t500, file=rf.cv1$filename)
+}
+rf.CV.summary(k10.t500)
+```
+```{r}
+k10.t500.forest.cv$Error.arr
+```
+
+
+### $10$-fold CV, 1000 Trees
+
+```{r forest-cv10-1000}
+# Perform 10-fold, 10 seed CV on 1000 trees.
+k10.t1000.forest.cv <- rf.CV.error(Liver.df, Liver.truth, k = 10, m = 100)
+# str(k10.m100.cv)
+# rf.CV.summary(k10.m100.cv)
+```
+
+### Whole Learning Sample Model
+
+The lecture material used the whole learning sample to fit a Random Forest classifier. Fitting that model on the whole learning sample produces the following results:
+
+```{r forest-lecture}
+set.seed(100)
+review.rf <- new.env(parent = emptyenv())
+review.rf$X <- Liver.features # Predictors.
+review.rf$Y <- Liver.labels # Already a factor.
+review.rf$FitObj <- randomForest(Liver.features, review.rf$Y)
+review.rf$FitObj
+review.rf$Table <- review.rf$FitObj$confusion[,1:2]
+review.rf$Table
+cat(sprintf("Error rate from lecture: %.5f%%", calc.error(review.rf$Table) * 100), "\n")
+```
+
+```{r forest-lecture-plot, fig.width=8, fig.height=5}
+plot(review.rf$FitObj, lwd=2, main = "Random Forest (Lecture)")
+abline(h=0.2667, lty=3, lwd=2)
+```
+## 6. Cross-Validation Results of Random Forest Compared to Cross-Validation Results of LDA
